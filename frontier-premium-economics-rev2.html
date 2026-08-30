@@ -77,25 +77,21 @@ td.k{color:var(--txt);font-weight:600}
 <div class="box"><span class="lbl">THE ARGUMENT</span>
 Token price is the wrong denominator. Model spend runs <strong>~1&ndash;2% of loaded labour</strong>
 (structural, <span class="tag hi">HIGH</span>), and on threshold-gated work delivered value is convex
-rather than linear in capability (modelled, <span class="tag med">MED</span>). Over long agentic
-horizons per-step reliability compounds &mdash; p<sup>N</sup> is the <em>upper bound</em> on that
-decay, not a measurement of it, since real failures correlate and harnesses recover (section 1).
+rather than linear in capability (modelled, <span class="tag med">MED</span>). Over long horizons
+per-step reliability compounds &mdash; p<sup>N</sup> is the <em>upper bound</em> on that decay, not a
+measurement of it, since real failures correlate and harnesses recover (section 1).
 <br><br>
-What has changed since August is the open-weights side of the ledger. Under this model's throughput
-assumption, self-hosting does not break even against a third-party open-weights API at any
-utilisation the fleet can reach &mdash; so the escape hatch from the premium is
-<strong>renting</strong> open weights rather than running them. That conclusion rests on 5,000 output
-tok/s per node, tagged <span class="tag lo">LOW</span> and the swing variable throughout; halve it
-and the crossover reappears at high sustained load.
-<br><br>
-The genuine overpayment isn't choosing proprietary; it's <strong>routing everything to a flagship
-max-effort tier</strong>.
+What changed since August is the open-weights ledger. Under this model's throughput assumption,
+self-hosting does not break even against a third-party open-weights API at any utilisation the fleet
+can reach &mdash; the escape hatch is <strong>renting</strong> open weights, not running them. That
+rests on 5,000 output tok/s per node, tagged <span class="tag lo">LOW</span> and the swing variable
+throughout. The genuine overpayment isn't choosing proprietary; it's <strong>routing everything to a
+flagship max-effort tier</strong>.
 <br><br>
 <strong>Correction of record.</strong> The August edition claimed a calibration advantage for the
-frontier tier. An interim draft of this version first <em>reversed</em> that claim on newer
-hallucination rates and led with it. Both readings were wrong, and both were this document's &mdash; the metric is conditional on
-non-correct answers and neither checked the denominator. Section 5 carries the decomposition; driver
-4 is withdrawn rather than flipped.</div>
+frontier tier; an interim draft of this version <em>reversed</em> it on newer hallucination rates.
+Both were wrong and both were this document's &mdash; the metric is conditional on non-correct
+answers and neither checked the denominator. Driver 4 is withdrawn, not flipped (section 5).</div>
 
 <div class="abs-h">ABSTRACT &mdash; WHAT CHANGED SINCE THE AUGUST EDITION</div>
 <div class="abs-s">Four load-bearing inputs moved. The thesis survives all four and reads stronger.</div>
@@ -105,40 +101,38 @@ non-correct answers and neither checked the denominator. Section 5 carries the d
 <div class="hd">Reference prices were two generations stale
 <span class="chip" style="color:#2563eb;border-color:#93c5fd;background:#dbeafe">CORRECTED</span></div>
 <div class="tx">The $75/1M flagship line was legacy Opus 4.1 pricing. Frontier output now runs
-<strong>$25</strong> (Opus 5) to <strong>$50</strong> (Fable 5), with GPT-5.6 Sol at $30. Sonnet 5
-held its introductory <strong>$2/$10</strong> as standard pricing &mdash; the scheduled 1 September
-increase to $3/$15 was cancelled. Every reference line in section 2 is redrawn.</div></div></div>
+<strong>$25</strong> (Opus 5) to <strong>$50</strong> (Fable 5). Sonnet 5 held its introductory
+<strong>$2/$10</strong> as standard &mdash; the 1 September increase was cancelled. Every reference
+line in section 2 is redrawn.</div></div></div>
 
 <div class="find" style="border-left-color:#dc2626">
 <div class="num" style="border-color:#dc2626;color:#dc2626">2</div><div class="bd">
 <div class="hd">Self-hosting lost its case entirely
 <span class="chip" style="color:#dc2626;border-color:#fca5a5;background:#fee2e2">REVISED</span></div>
 <div class="tx">Hosted open-weights output fell from the assumed <strong>$6/1M</strong> floor to a
-<strong>~$1.85 provider median</strong>. Four nodes running flat out for a year produce ~631B output
-tokens worth ~$1.17M of API spend against $1.81M of fixed cost &mdash; <strong>there is no
-utilisation at which the modelled fleet wins</strong>. Against mid-tier at $10 the crossover moved to
-28.7&ndash;34.3%, now sitting <em>inside</em> the 20&ndash;35% real band rather than below it.</div></div></div>
+<strong>~$1.85 provider median</strong>. Four nodes flat out for a year produce ~631B output tokens
+worth ~$1.17M of API spend against $1.81M fixed &mdash; <strong>no utilisation at which the modelled
+fleet wins</strong>. The mid-tier crossover moved to 28.7&ndash;34.3%, now <em>inside</em> the
+20&ndash;35% real band.</div></div></div>
 
 <div class="find" style="border-left-color:#7c3aed">
 <div class="num" style="border-color:#7c3aed;color:#7c3aed">3</div><div class="bd">
 <div class="hd">The calibration driver was a denominator error
 <span class="chip" style="color:#7c3aed;border-color:#c4b5fd;background:#ede9fe">WITHDRAWN</span></div>
-<div class="tx">AA-Omniscience hallucination rate is <strong>incorrect &divide; all non-correct
-responses</strong>, so abstaining deflates it. Decomposed per 100 questions, absolute wrong
-assertions span only <strong>20.1 to 27.9</strong> across a lineup running 40&ndash;65% accuracy.
-Sonnet 5's "good" 39.4% rate yields <strong>23.6 wrong answers</strong> &mdash; more than Fable 5's
-"bad" 63.6% rate yields at <strong>22.3</strong>. The frontier tier is <em>not</em> less reliable; it
-attempts far more and declines far less. The August driver and its first correction are both
-withdrawn.</div></div></div>
+<div class="tx">The rate is <strong>incorrect &divide; all non-correct responses</strong>, so
+abstaining deflates it. Decomposed per 100 questions, absolute wrong assertions span only
+<strong>20.1 to 27.9</strong> across a lineup running 40&ndash;65% accuracy. Sonnet 5's "good" 39.4%
+yields <strong>23.6 wrong answers</strong> &mdash; more than Fable 5's "bad" 63.6% at
+<strong>22.3</strong>. The frontier tier is <em>not</em> less reliable; it attempts more and declines
+less.</div></div></div>
 
 <div class="find" style="border-left-color:#d97706">
 <div class="num" style="border-color:#d97706;color:#d97706">4</div><div class="bd">
 <div class="hd">The composite index caught up to p<sup>N</sup>
 <span class="chip" style="color:#d97706;border-color:#fcd34d;background:#fef3c7">REFRAMED</span></div>
 <div class="tx">Intelligence Index v4.1 is roughly <strong>50% agentic weight</strong> (GDPval-AA v2
-20%, Terminal-Bench 2.1 16%, &tau;&sup3;-Banking 14%) with the GDPval turn limit raised from 100 to
-250. The compounding mechanism is unchanged and still HIGH; the claim that composites hide it is now
-only partly true.</div></div></div>
+20%, Terminal-Bench 2.1 16%, &tau;&sup3;-Banking 14%), GDPval turn limit raised 100&rarr;250. The
+mechanism is unchanged; the claim that composites hide it is now only partly true.</div></div></div>
 
 <div class="netbar"><span class="lbl">NET</span>
 The escape hatch from the frontier premium is <strong>renting</strong> open weights, not running
