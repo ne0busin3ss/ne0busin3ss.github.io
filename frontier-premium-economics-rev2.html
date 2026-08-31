@@ -77,8 +77,8 @@ td.k{color:var(--txt);font-weight:600}
 <div class="box"><span class="lbl">THE ARGUMENT</span>
 Token price is the wrong denominator. Model spend runs <strong>~1&ndash;2% of loaded labour</strong>
 (structural, <span class="tag hi">HIGH</span>), and on threshold-gated work delivered value is convex
-rather than linear in capability (modelled, <span class="tag med">MED</span>). Over long horizons
-per-step reliability compounds &mdash; p<sup>N</sup> is the <em>upper bound</em> on that decay, not a
+rather than linear in capability (modelled, <span class="tag med">MED</span>). Over long
+horizons<sup style="color:#7c3aed;font-weight:700">*</sup> per-step reliability compounds &mdash; p<sup>N</sup> is the <em>upper bound</em> on that decay, not a
 measurement of it, since real failures correlate and harnesses recover (section 1).
 <br><br>
 What changed since August is the open-weights ledger. Under this model's throughput assumption,
@@ -337,6 +337,33 @@ calibration work adds is a warning about the <em>diagnosis</em> rather than a ne
 reliability measurement</strong>, and reading one that way yields a routing rule that moves ~3 wrong
 answers per 100 while giving up 25 points of accuracy. Segment by horizon and by whether the work is
 grounded &mdash; not by a conditional rate.</div>
+
+<h2>Notes &amp; clarifications</h2>
+<div class="h2sub">Plain-language expansion of a term used above</div>
+<div class="box pur"><span class="lbl">* WHAT p<sup>N</sup> MEANS, AND WHAT IT DOESN'T</span>
+Take an agent on a 50-step task &mdash; read a file, edit it, run tests, read the output, and so on.
+If it gets each individual step right 97% of the time, the chance of getting through all 50 without a
+single mistake is 0.97 multiplied by itself 50 times, or about <strong>22%</strong>. Raise per-step
+reliability to 99% and it becomes <strong>61%</strong>. That multiplication is what p<sup>N</sup>
+means, and it is why a two-point gap that looks trivial on a single question decides whether an agent
+finishes at all.
+<br><br>
+<strong>Two things make the real world kinder than that formula.</strong> First, the math assumes
+every step is an independent coin flip. Real agents aren't like that &mdash; if the model misreads
+the task at step 3 and forms a bad plan, steps 4 through 50 are not fresh chances to fail, they are
+all downstream of the same mistake. Failures cluster rather than scatter, so "50 independent
+opportunities to fail" overstates how many genuinely separate ones exist. Second, the math assumes
+one mistake ends the run. Real harnesses &mdash; the scaffolding around the model, with retries and
+error feedback &mdash; let the agent see a failed test, try something else, and carry on. A failed
+step often costs time rather than killing the task.
+<br><br>
+The recovery effect usually dominates, so observed completion rates come out
+<strong>better</strong> than the formula predicts. Hence "upper bound on the decay, not a measurement
+of it": read the curve in section 1 as the worst case and the shape of the problem, not a forecast.
+<strong>What survives regardless is the ranking</strong> &mdash; a more reliable model pulls further
+ahead the longer the task runs, and the gap widens with horizon. What should not travel into a
+business case is the specific multiplier: "2.8&times; better at 50 steps" describes the shape of the
+effect, not your harness's output.</div>
 
 <div class="src">
 <b>Sources &amp; confidence.</b> Reliability compounding is derived arithmetic (p<sup>N</sup>) &mdash;
