@@ -36,18 +36,23 @@ body { margin:0; background:var(--bg); color:var(--text);
 .verdict-text { font-size:11.5px; color:var(--text-muted); line-height:1.65; }
 .verdict-text strong { color:var(--text); }
 
-.tab-nav { display:flex; gap:5px; margin-bottom:18px; flex-wrap:wrap;
-  border-bottom:1px solid var(--border); }
+.tab-nav { display:flex; gap:5px; flex-wrap:wrap; position:sticky; top:0; z-index:20;
+  background:rgba(255,255,255,0.94); backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--border); padding:9px 0 0; margin-bottom:4px; }
 .tab-btn { font-family:inherit; font-size:10px; font-weight:600; cursor:pointer;
   background:transparent; border:1px solid transparent; border-bottom:none;
-  color:var(--text-dim); padding:8px 11px; border-radius:8px 8px 0 0; }
+  color:var(--text-dim); padding:7px 11px; border-radius:7px 7px 0 0; }
 .tab-btn:hover { color:var(--text); background:var(--surface); }
 .tab-btn.active { color:var(--accent); background:#fff;
   border-color:var(--border); border-bottom:2px solid #fff; margin-bottom:-1px; }
 
-.tab-content { display:none; }
-.tab-content.active { display:block; animation:fade .25s ease; }
-@keyframes fade { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+.tab-content { display:block; padding-top:26px; margin-top:24px;
+  border-top:1px solid var(--border-strong); scroll-margin-top:52px; }
+.tab-content:first-of-type { border-top:none; margin-top:10px; }
+.sec-head { margin-bottom:12px; }
+.sec-head h2 { font-size:15px; font-weight:700; margin:0 0 3px; letter-spacing:-0.2px; }
+.sec-head p { font-size:10px; color:var(--text-dim); margin:0; }
+
 
 .section-intro { font-size:11.5px; color:var(--text-muted); line-height:1.7; margin-bottom:16px; }
 .section-intro strong { color:var(--text); }
@@ -807,15 +812,47 @@ document.getElementById('notes').innerHTML = P.notes.map(([title,body,conf],i) =
     <div class="note-b" style="padding-left:17px">${body}</div>
   </div>`).join('');
 
-/* ── tabs ────────────────────────────────────────────────────── */
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
-  });
+/* ── linear document: headings, anchor nav, scroll-spy ───────── */
+const SECTIONS = {
+  reliability:['1 · Agentic error compounding',
+    'Task completion probability vs horizon · P(success) ≈ pᴺ'],
+  labor:['2 · The labour denominator',
+    'Unit cost = (1 + f) / m · f = spend as a fraction of loaded labour, m = throughput multiplier'],
+  substitution:['3 · Substitution modes',
+    'Two ways to bank the same multiplier · identical on unit cost, different on total value'],
+  threshold:['4 · Threshold-gated value',
+    'Delivered value vs capability · the composite-average trap, priced'],
+  tco:['5 · Self-hosting total cost of ownership',
+    'Effective cost per 1M output tokens vs fleet utilisation · 4× 8×H200 + 3 ops FTE'],
+  net:['Net read', 'Nine drivers, with basis and confidence'],
+  notes:['Notes & clarifications',
+    'Everything that is a choice rather than a measurement, stated plainly']
+};
+Object.entries(SECTIONS).forEach(([k,[title,sub]]) => {
+  const el = document.getElementById('tab-'+k);
+  if (!el) return;
+  const hd = document.createElement('div');
+  hd.className = 'sec-head';
+  hd.innerHTML = `<h2>${title}</h2><p>${sub}</p>`;
+  el.insertBefore(hd, el.firstChild);
 });
+
+const btns = [...document.querySelectorAll('.tab-btn')];
+btns.forEach(btn => btn.addEventListener('click', () => {
+  document.getElementById('tab-'+btn.dataset.tab)
+    .scrollIntoView({behavior:'smooth', block:'start'});
+}));
+
+const setActive = () => {
+  let cur = btns[0];
+  for (const b of btns) {
+    const el = document.getElementById('tab-'+b.dataset.tab);
+    if (el && el.getBoundingClientRect().top <= 90) cur = b;
+  }
+  btns.forEach(b => b.classList.toggle('active', b === cur));
+};
+window.addEventListener('scroll', setActive, {passive:true});
+setActive();
 </script>
 </body>
 </html>
