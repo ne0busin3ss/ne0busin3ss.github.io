@@ -39,6 +39,11 @@ h1{font-size:34px;line-height:1.2;margin:0 0 10px;color:var(--ink)}
 .sub{font-size:18px;margin:0 0 14px;color:var(--ink2)}
 .meta{display:flex;flex-wrap:wrap;gap:8px;font-size:13px}
 .pill{border:1px solid var(--rule);border-radius:999px;padding:3px 12px;background:var(--bg2);color:var(--ink)}
+.dl{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--blue);border-radius:999px;padding:3px 12px;background:var(--blue);color:var(--bg);font-weight:600;text-decoration:none}
+.dl.alt{background:var(--bg);color:var(--ink)}
+.dl:hover{filter:brightness(1.08)}
+.dl svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+@media print{.dl{display:none}}
 .pill.rev{border-color:var(--blue);border-width:2px;font-weight:600}
 nav.toc{border:1px solid var(--rule);border-left:4px solid var(--blue);background:var(--bg2);padding:14px 18px;margin:0 0 32px;border-radius:0 8px 8px 0}
 nav.toc strong{display:block;font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
@@ -125,6 +130,8 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
     <span class="pill rev">REV 1.1</span>
     <span class="pill">19 September 2026</span>
     <span class="pill">Confidence-tagged · provenance at end</span>
+    <a class="dl" href="how-ai-is-built-light.pdf" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4M4 19h16"/></svg>Download PDF · light</a>
+    <a class="dl alt" href="how-ai-is-built-dark.pdf" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4M4 19h16"/></svg>Download PDF · dark</a>
   </div>
 </header>
 
