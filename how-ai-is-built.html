@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How AI Is Built and Implemented — REV 1.1</title>
+<meta name="description" content="High-level overview of how modern AI systems are built (data, pretraining, post-training, evaluation) and implemented (serving, orchestration, applications), with diagrams, a training-compute chart, and confidence-tagged provenance.">
+<style>
+:root{
+  --bg:#ffffff; --bg2:#f8fafc; --ink:#0f172a; --ink2:#1e293b; --rule:#cbd5e1; --axis:#64748b; --grid:#e2e8f0;
+  --blue:#2563eb; --red:#dc2626; --amber:#d97706; --green:#16a34a; --purple:#7c3aed; --cyan:#0891b2;
+  --fb:#eff6ff; --fg:#f0fdf4; --fc:#ecfeff; --fp:#f5f3ff; --fa:#fffbeb; --fn:#f8fafc;
+  --pt-blue:#2563eb; --pt-amber:#d97706;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0b1220; --bg2:#111a2e; --ink:#f8fafc; --ink2:#e2e8f0; --rule:#475569; --axis:#94a3b8; --grid:#273449;
+  --blue:#60a5fa; --red:#f87171; --amber:#fbbf24; --green:#4ade80; --purple:#a78bfa; --cyan:#22d3ee;
+  --fb:#172554; --fg:#14532d; --fc:#164e63; --fp:#2e1065; --fa:#451a03; --fn:#1e293b;
+  --pt-blue:#60a5fa; --pt-amber:#fbbf24;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]):not([data-theme="dark"]){
+    --bg:#0b1220; --bg2:#111a2e; --ink:#f8fafc; --ink2:#e2e8f0; --rule:#475569; --axis:#94a3b8; --grid:#273449;
+    --blue:#60a5fa; --red:#f87171; --amber:#fbbf24; --green:#4ade80; --purple:#a78bfa; --cyan:#22d3ee;
+    --fb:#172554; --fg:#14532d; --fc:#164e63; --fp:#2e1065; --fa:#451a03; --fn:#1e293b;
+    --pt-blue:#60a5fa; --pt-amber:#fbbf24;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:17px;line-height:1.65}
+.page{max-width:900px;margin:0 auto;padding:40px 20px 64px}
+header.doc{border-bottom:3px solid var(--blue);padding-bottom:20px;margin-bottom:28px}
+.kicker{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin:0 0 8px}
+h1{font-size:34px;line-height:1.2;margin:0 0 10px;color:var(--ink)}
+.sub{font-size:18px;margin:0 0 14px;color:var(--ink2)}
+.meta{display:flex;flex-wrap:wrap;gap:8px;font-size:13px}
+.pill{border:1px solid var(--rule);border-radius:999px;padding:3px 12px;background:var(--bg2);color:var(--ink)}
+.pill.rev{border-color:var(--blue);border-width:2px;font-weight:600}
+nav.toc{border:1px solid var(--rule);border-left:4px solid var(--blue);background:var(--bg2);padding:14px 18px;margin:0 0 32px;border-radius:0 8px 8px 0}
+nav.toc strong{display:block;font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+nav.toc ol{margin:0;padding-left:20px}
+nav.toc a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--blue);text-underline-offset:3px}
+h2{font-size:25px;line-height:1.25;margin:44px 0 12px;padding-left:12px;border-left:5px solid var(--blue);color:var(--ink)}
+h2.s2{border-left-color:var(--purple)} h2.s3{border-left-color:var(--amber)} h2.s4{border-left-color:var(--green)} h2.s5{border-left-color:var(--cyan)} h2.s6{border-left-color:var(--red)}
+h3{font-size:18px;margin:26px 0 8px;color:var(--ink)}
+p{margin:0 0 14px}
+ul{margin:0 0 16px;padding-left:22px}
+li{margin-bottom:9px}
+li::marker{color:var(--blue)}
+.term{font-weight:650}
+a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--blue);text-underline-offset:3px}
+figure{margin:22px 0 26px;border:1px solid var(--rule);border-radius:12px;padding:14px;background:var(--bg)}
+figure svg{display:block;width:100%;height:auto}
+figcaption{font-size:14px;color:var(--ink2);border-top:1px solid var(--rule);margin-top:10px;padding-top:8px}
+figcaption b{color:var(--ink)}
+svg text{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;fill:var(--ink)}
+svg .h{font-size:14px;font-weight:600}
+svg .s{font-size:12px;fill:var(--ink2)}
+svg .ax{font-size:12px;fill:var(--ink)}
+svg .lb{font-size:12.5px;font-weight:600;fill:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;font-size:13px;margin:0 0 8px;color:var(--ink)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.tablewrap{overflow-x:auto;margin:16px 0 24px;border:1px solid var(--rule);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:15px;min-width:620px}
+th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--rule);color:var(--ink)}
+th{background:var(--bg2);font-size:13px;letter-spacing:.04em;text-transform:uppercase;border-bottom:2px solid var(--ink)}
+tr:last-child td{border-bottom:none}
+td:first-child{font-weight:650;white-space:nowrap}
+.callout{border:1px solid var(--rule);border-left:5px solid var(--amber);background:var(--bg);padding:12px 16px;margin:18px 0 22px;border-radius:0 8px 8px 0}
+.callout.sec{border-left-color:var(--red)}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.05em;padding:1px 8px;border-radius:4px;border:2px solid;background:var(--bg);color:var(--ink);vertical-align:1px;margin-right:6px}
+.tag.hi{border-color:var(--green)} .tag.md{border-color:var(--amber)} .tag.lo{border-color:var(--red)}
+.prov li{margin-bottom:11px}
+footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-size:13.5px;color:var(--ink2)}
+
+.ctl{display:flex;align-items:center;gap:12px;margin:4px 0 10px;font-size:14px;color:var(--ink)}
+.ctl input{flex:1;accent-color:var(--blue)}
+.ctl b{min-width:120px;font-weight:600}
+.bars{display:grid;grid-template-columns:150px 1fr 52px;gap:6px 10px;align-items:center;font-size:13px;margin-top:10px;color:var(--ink)}
+.bar{height:16px;background:var(--grid);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--pt-blue);transition:width .35s}
+.bar.win i{background:var(--green)}
+.lnote{font-size:13.5px;color:var(--ink);border-left:4px solid var(--amber);padding:6px 10px;margin-top:12px;background:var(--bg)}
+@media print{.ctl input{display:none}}
+
+.themebar{display:flex;justify-content:flex-end;margin:0 0 14px}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:999px;overflow:hidden;background:var(--bg2)}
+.seg button{appearance:none;border:0;background:transparent;color:var(--ink);font:inherit;font-size:13px;padding:6px 14px;cursor:pointer;line-height:1}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--blue);color:var(--bg);font-weight:600}
+.seg button:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+@media print{.themebar{display:none}
+  html,body{background:var(--bg) !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+@media (max-width:600px){body{font-size:16px}h1{font-size:27px}h2{font-size:21px}.page{padding:24px 14px 48px}}
+@media print{
+  .page{max-width:none;padding:0}
+  figure,.tablewrap,.callout,nav.toc{break-inside:avoid}
+  h2,h3{break-after:avoid}
+  .tablewrap{overflow:visible}
+  a{text-decoration:none}
+}
+</style>
+<script>try{var t=localStorage.getItem('ai-doc-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+</head>
+<body>
+<div class="page">
+
+<div class="themebar" role="group" aria-label="Color theme">
+  <div class="seg">
+    <button type="button" data-set="auto" aria-pressed="true">Auto</button>
+    <button type="button" data-set="light" aria-pressed="false">Light</button>
+    <button type="button" data-set="dark" aria-pressed="false">Dark</button>
+  </div>
+</div>
+<header class="doc">
+  <p class="kicker">AI fundamentals · Overview</p>
+  <h1>How AI Is Built and Implemented</h1>
+  <p class="sub">The lifecycle, the mechanism inside the model, the scale economics, and the software layer that turns a model into a product.</p>
+  <div class="meta">
+    <span class="pill rev">REV 1.1</span>
+    <span class="pill">19 September 2026</span>
+    <span class="pill">Confidence-tagged · provenance at end</span>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#lifecycle">The lifecycle: two phases with different economics</a></li>
+    <li><a href="#inside">Inside the model: one pass per token</a></li>
+    <li><a href="#scale">Scale: why building is a capital project</a></li>
+    <li><a href="#implement">Implementation: the model is one component</a></li>
+    <li><a href="#resolve">How a model reads one token, and where backpropagation fits</a></li>
+    <li><a href="#provenance">Provenance and confidence</a></li>
+  </ol>
+</nav>
+
+<h2 id="lifecycle">1. The lifecycle: two phases with different economics</h2>
+<p>"AI" as shipped today is a large neural network whose behavior is set in a one-time <span class="term">training</span> phase and then used in a per-request <span class="term">inference</span> phase. Training produces a frozen file of numbers called weights. Inference is that file being run, over and over, for every request. Every later cost and performance question traces back to this split: building is a capital expense paid once, implementing is an operating expense paid per token.</p>
+
+<figure>
+<svg viewBox="0 0 680 365" role="img" aria-labelledby="f1t f1d">
+<title id="f1t">AI lifecycle: build versus implement</title>
+<desc id="f1d">Two bands. Build: data, pretraining, post-training, evaluation. Implement: weights, serving, orchestration, application. Evaluation hands off to weights, and usage feeds the next training run.</desc>
+<defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<rect x="30" y="20" width="620" height="130" rx="8" fill="none" stroke="var(--blue)" stroke-width="1.2" stroke-dasharray="5 4"/>
+<text class="h" x="46" y="42">Build: training (one-time, capital-heavy)</text>
+<rect x="50" y="58" width="125" height="72" rx="6" fill="var(--fb)" stroke="var(--blue)" stroke-width="1.3"/><text class="h" x="112.5" y="86" text-anchor="middle" dominant-baseline="central">Data</text><text class="s" x="112.5" y="108" text-anchor="middle" dominant-baseline="central">Curate + tokenize</text>
+<rect x="205" y="58" width="125" height="72" rx="6" fill="var(--fb)" stroke="var(--blue)" stroke-width="1.3"/><text class="h" x="267.5" y="86" text-anchor="middle" dominant-baseline="central">Pretraining</text><text class="s" x="267.5" y="108" text-anchor="middle" dominant-baseline="central">Next-token loss</text>
+<rect x="360" y="58" width="125" height="72" rx="6" fill="var(--fb)" stroke="var(--blue)" stroke-width="1.3"/><text class="h" x="422.5" y="86" text-anchor="middle" dominant-baseline="central">Post-training</text><text class="s" x="422.5" y="108" text-anchor="middle" dominant-baseline="central">SFT, RLHF, RL</text>
+<rect x="515" y="58" width="125" height="72" rx="6" fill="var(--fb)" stroke="var(--blue)" stroke-width="1.3"/><text class="h" x="577.5" y="86" text-anchor="middle" dominant-baseline="central">Evaluation</text><text class="s" x="577.5" y="108" text-anchor="middle" dominant-baseline="central">Tests + red-team</text>
+<line x1="175" y1="94" x2="203" y2="94" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<line x1="330" y1="94" x2="358" y2="94" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<line x1="485" y1="94" x2="513" y2="94" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<path d="M577.5 130 L577.5 170 L112.5 170 L112.5 226" fill="none" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<rect x="30" y="190" width="620" height="130" rx="8" fill="none" stroke="var(--green)" stroke-width="1.2" stroke-dasharray="5 4"/>
+<text class="h" x="46" y="212">Implement: inference (per request, operating cost)</text>
+<rect x="50" y="228" width="125" height="72" rx="6" fill="var(--fg)" stroke="var(--green)" stroke-width="1.3"/><text class="h" x="112.5" y="256" text-anchor="middle" dominant-baseline="central">Weights</text><text class="s" x="112.5" y="278" text-anchor="middle" dominant-baseline="central">Frozen parameters</text>
+<rect x="205" y="228" width="125" height="72" rx="6" fill="var(--fg)" stroke="var(--green)" stroke-width="1.3"/><text class="h" x="267.5" y="256" text-anchor="middle" dominant-baseline="central">Serving</text><text class="s" x="267.5" y="278" text-anchor="middle" dominant-baseline="central">Batching + cache</text>
+<rect x="360" y="228" width="125" height="72" rx="6" fill="var(--fg)" stroke="var(--green)" stroke-width="1.3"/><text class="h" x="422.5" y="256" text-anchor="middle" dominant-baseline="central">Orchestration</text><text class="s" x="422.5" y="278" text-anchor="middle" dominant-baseline="central">Context + tools</text>
+<rect x="515" y="228" width="125" height="72" rx="6" fill="var(--fg)" stroke="var(--green)" stroke-width="1.3"/><text class="h" x="577.5" y="256" text-anchor="middle" dominant-baseline="central">Application</text><text class="s" x="577.5" y="278" text-anchor="middle" dominant-baseline="central">Chat, IDE, API</text>
+<line x1="175" y1="264" x2="203" y2="264" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<line x1="330" y1="264" x2="358" y2="264" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<line x1="485" y1="264" x2="513" y2="264" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<text class="s" x="340" y="345" text-anchor="middle">↻ Usage data, failures and new evals feed the next training run</text>
+</svg>
+<figcaption><b>Figure 1.</b> The build phase (blue) ends in a frozen set of weights. The implement phase (green) runs those weights for every request.</figcaption>
+</figure>
+
+<h3>What each build stage contributes</h3>
+<ul>
+  <li><span class="term">Data.</span> Trillions of tokens of text, code, images and licensed or synthetic material. It is deduplicated, quality-filtered, and converted to tokens, the sub-word integer IDs the model actually sees. Data quality is now as much a differentiator as quantity.</li>
+  <li><span class="term">Pretraining.</span> A single objective: predict the next token. Gradient descent adjusts the parameters until prediction error stops falling. This is where nearly all the raw knowledge and the bulk of the compute goes. The output is a "base model" that completes text but does not follow instructions.</li>
+  <li><span class="term">Post-training.</span> Supervised fine-tuning (SFT) on example dialogues, then reinforcement learning, either from human preference (RLHF) or from verifiable outcomes such as tests that pass or math that checks. This turns a text completer into an assistant and produces "reasoning" behavior. Distillation, training a smaller model on a larger model's outputs, also sits here.</li>
+  <li><span class="term">Evaluation.</span> Benchmarks, red-teaming and safety testing gate release. A pass freezes the weights.</li>
+</ul>
+
+<h2 id="inside" class="s2">2. Inside the model: one pass per token</h2>
+<p>The frozen weights implement a <span class="term">transformer</span>. The model does not look anything up or run a program in the usual sense. It converts text to numbers, pushes those numbers through a deep stack of identical layers, and produces a probability for every possible next token. One token is chosen, appended to the input, and the whole process runs again.</p>
+
+<figure>
+<svg viewBox="0 0 680 326" role="img" aria-labelledby="f2t f2d">
+<title id="f2t">Token generation loop</title>
+<desc id="f2d">Left column: prompt text, tokenizer, embeddings. Center: transformer block repeated N times containing self-attention and feed-forward layers. Right column: probabilities, sampler, output token, which is appended to the input.</desc>
+<rect x="40" y="50" width="150" height="44" rx="6" fill="var(--fc)" stroke="var(--cyan)" stroke-width="1.3"/><text class="h" x="115" y="72" text-anchor="middle" dominant-baseline="central">Prompt text</text>
+<line x1="115" y1="94" x2="115" y2="122" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<rect x="40" y="124" width="150" height="56" rx="6" fill="var(--fc)" stroke="var(--cyan)" stroke-width="1.3"/><text class="h" x="115" y="142" text-anchor="middle" dominant-baseline="central">Tokenizer</text><text class="s" x="115" y="162" text-anchor="middle" dominant-baseline="central">Text → token IDs</text>
+<line x1="115" y1="180" x2="115" y2="208" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<rect x="40" y="210" width="150" height="56" rx="6" fill="var(--fc)" stroke="var(--cyan)" stroke-width="1.3"/><text class="h" x="115" y="228" text-anchor="middle" dominant-baseline="central">Embeddings</text><text class="s" x="115" y="248" text-anchor="middle" dominant-baseline="central">IDs → vectors</text>
+<line x1="190" y1="238" x2="228" y2="238" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<rect x="230" y="40" width="220" height="236" rx="8" fill="none" stroke="var(--purple)" stroke-width="1.2" stroke-dasharray="5 4"/>
+<text class="h" x="340" y="64" text-anchor="middle" dominant-baseline="central">Transformer block × N</text>
+<rect x="250" y="84" width="180" height="56" rx="6" fill="var(--fp)" stroke="var(--purple)" stroke-width="1.3"/><text class="h" x="340" y="102" text-anchor="middle" dominant-baseline="central">Self-attention</text><text class="s" x="340" y="122" text-anchor="middle" dominant-baseline="central">Tokens read each other</text>
+<line x1="340" y1="140" x2="340" y2="158" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<rect x="250" y="160" width="180" height="56" rx="6" fill="var(--fp)" stroke="var(--purple)" stroke-width="1.3"/><text class="h" x="340" y="178" text-anchor="middle" dominant-baseline="central">Feed-forward (MLP)</text><text class="s" x="340" y="198" text-anchor="middle" dominant-baseline="central">Applies learned knowledge</text>
+<text class="s" x="340" y="248" text-anchor="middle" dominant-baseline="central">Stacked tens to 100+ times</text>
+<line x1="450" y1="78" x2="488" y2="78" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<rect x="490" y="50" width="150" height="56" rx="6" fill="var(--fc)" stroke="var(--cyan)" stroke-width="1.3"/><text class="h" x="565" y="68" text-anchor="middle" dominant-baseline="central">Probabilities</text><text class="s" x="565" y="88" text-anchor="middle" dominant-baseline="central">Over whole vocabulary</text>
+<line x1="565" y1="106" x2="565" y2="122" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<rect x="490" y="124" width="150" height="56" rx="6" fill="var(--fc)" stroke="var(--cyan)" stroke-width="1.3"/><text class="h" x="565" y="142" text-anchor="middle" dominant-baseline="central">Sampler</text><text class="s" x="565" y="162" text-anchor="middle" dominant-baseline="central">Picks one token</text>
+<line x1="565" y1="180" x2="565" y2="208" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<rect x="490" y="210" width="150" height="56" rx="6" fill="var(--fc)" stroke="var(--cyan)" stroke-width="1.3"/><text class="h" x="565" y="228" text-anchor="middle" dominant-baseline="central">Output token</text><text class="s" x="565" y="248" text-anchor="middle" dominant-baseline="central">Appended to input</text>
+<text class="s" x="340" y="306" text-anchor="middle">↻ One full pass through all N blocks per output token, then repeat</text>
+</svg>
+<figcaption><b>Figure 2.</b> Input and output handling (cyan) surrounds the transformer stack (purple). Generation is a loop: every output token costs one full pass.</figcaption>
+</figure>
+
+<h3>Three consequences of the loop</h3>
+<ul>
+  <li><span class="term">Input is cheap, output is expensive.</span> The whole prompt is processed in one parallel pass, called prefill. Each output token needs its own sequential pass, called decode. This is the mechanical reason output tokens are priced several times higher than input tokens, and why total token count tends to drive cost-per-task more than list price does.</li>
+  <li><span class="term">The KV cache is the memory tax.</span> Attention stores intermediate results for every prior token so they are not recomputed. That cache grows with context length and consumes accelerator memory, which makes serving bound by memory bandwidth more than by arithmetic. Cached-prefix discounts exist because a provider can reuse this state.</li>
+  <li><span class="term">"Reasoning" is more tokens through the same loop.</span> Effort tiers buy additional decode passes before the answer. The network itself does not change.</li>
+</ul>
+
+<h2 id="scale" class="s3">3. Scale: why building is a capital project</h2>
+<p>Capability has tracked training compute closely, so labs have scaled it relentlessly. Epoch AI's trend dashboard puts frontier language-model training compute at about 5× per year since 2020, a doubling roughly every 5.2 months, with training costs rising about 3.5× per year and power requirements doubling annually. <span class="tag hi">HIGH</span></p>
+
+<figure>
+<div class="legend">
+  <span><svg width="14" height="14" viewBox="0 0 14 14" style="width:14px;display:inline-block"><circle cx="7" cy="7" r="6" fill="var(--pt-blue)"/></svg>Developer-reported (circle)</span>
+  <span><svg width="14" height="14" viewBox="0 0 14 14" style="width:14px;display:inline-block"><polygon points="7,1 1,13 13,13" fill="var(--pt-amber)"/></svg>Third-party estimate (triangle)</span>
+  <span><svg width="18" height="12" viewBox="0 0 18 12" style="width:18px;display:inline-block"><rect x="1" y="1" width="16" height="10" fill="none" stroke="var(--purple)" stroke-width="1.5" stroke-dasharray="4 3"/></svg>2025–26 frontier band (secondary source)</span>
+</div>
+<svg viewBox="0 0 760 420" role="img" aria-labelledby="f3t f3d">
+<title id="f3t">Training compute of landmark AI models, 2012 to 2024, log scale</title>
+<desc id="f3d">AlexNet 2012 4.7e17 FLOP; Transformer 2017 7.4e18; BERT-Large 2018 2.9e20; GPT-3 2020 3.1e23; PaLM 2022 2.5e24; GPT-4 2023 2e25; Gemini Ultra 2023 5e25; Llama 3.1 405B 2024 3.8e25. A dashed band marks 1e26 to 1e27 FLOP for 2025 to 2026 frontier runs.</desc>
+<g stroke="var(--grid)" stroke-width="1">
+<line x1="80" y1="330" x2="730" y2="330"/><line x1="80" y1="300" x2="730" y2="300"/><line x1="80" y1="270" x2="730" y2="270"/><line x1="80" y1="240" x2="730" y2="240"/><line x1="80" y1="210" x2="730" y2="210"/><line x1="80" y1="180" x2="730" y2="180"/><line x1="80" y1="150" x2="730" y2="150"/><line x1="80" y1="120" x2="730" y2="120"/><line x1="80" y1="90" x2="730" y2="90"/><line x1="80" y1="60" x2="730" y2="60"/><line x1="80" y1="30" x2="730" y2="30"/>
+</g>
+<line x1="80" y1="30" x2="80" y2="360" stroke="var(--axis)" stroke-width="1.2"/>
+<line x1="80" y1="360" x2="730" y2="360" stroke="var(--axis)" stroke-width="1.2"/>
+<g text-anchor="end">
+<text class="ax" x="72" y="364">1e17</text><text class="ax" x="72" y="334">1e18</text><text class="ax" x="72" y="304">1e19</text><text class="ax" x="72" y="274">1e20</text><text class="ax" x="72" y="244">1e21</text><text class="ax" x="72" y="214">1e22</text><text class="ax" x="72" y="184">1e23</text><text class="ax" x="72" y="154">1e24</text><text class="ax" x="72" y="124">1e25</text><text class="ax" x="72" y="94">1e26</text><text class="ax" x="72" y="64">1e27</text><text class="ax" x="72" y="34">1e28</text>
+</g>
+<g text-anchor="middle">
+<text class="ax" x="80" y="380">2012</text><text class="ax" x="161.25" y="380">2014</text><text class="ax" x="242.5" y="380">2016</text><text class="ax" x="323.75" y="380">2018</text><text class="ax" x="405" y="380">2020</text><text class="ax" x="486.25" y="380">2022</text><text class="ax" x="567.5" y="380">2024</text><text class="ax" x="648.75" y="380">2026</text><text class="ax" x="730" y="380">2028</text>
+<text class="ax" x="405" y="408">Release year</text>
+</g>
+<text class="ax" x="80" y="16">Training compute (FLOP, log scale)</text>
+<rect x="608.1" y="60" width="81.3" height="30" fill="none" stroke="var(--purple)" stroke-width="1.6" stroke-dasharray="5 4"><title>2025–26 frontier training runs: roughly 1e26 to 1e27 FLOP (LOW confidence, secondary source)</title></rect>
+<text class="lb" x="689" y="50" text-anchor="end">2025–26 frontier runs (LOW)</text>
+<g fill="var(--pt-amber)" stroke="var(--bg)" stroke-width="2">
+<polygon points="110.5,331.8 103.5,344.8 117.5,344.8"><title>AlexNet (2012): ~4.7e17 FLOP — third-party estimate</title></polygon>
+<polygon points="301.4,295.9 294.4,308.9 308.4,308.9"><title>Transformer, big (2017): ~7.4e18 FLOP — third-party estimate</title></polygon>
+<polygon points="355.4,248.4 348.4,261.4 362.4,261.4"><title>BERT-Large (2018): ~2.9e20 FLOP — third-party estimate</title></polygon>
+<polygon points="535,103 528,116 542,116"><title>GPT-4 (2023): ~2e25 FLOP — Epoch AI estimate</title></polygon>
+<polygon points="564.7,91 557.7,104 571.7,104"><title>Gemini Ultra (2023): ~5e25 FLOP — Epoch AI estimate</title></polygon>
+</g>
+<g fill="var(--pt-blue)" stroke="var(--bg)" stroke-width="2">
+<circle cx="421.3" cy="165.1" r="7"><title>GPT-3 175B (2020): 3.14e23 FLOP — developer-reported</title></circle>
+<circle cx="496.8" cy="138.1" r="7"><title>PaLM 540B (2022): ~2.5e24 FLOP — developer-reported</title></circle>
+<circle cx="590.3" cy="102.6" r="7"><title>Llama 3.1 405B (2024): 3.8e25 FLOP — developer-reported</title></circle>
+</g>
+<text class="lb" x="123" y="344">AlexNet</text>
+<text class="lb" x="314" y="308">Transformer</text>
+<text class="lb" x="368" y="261">BERT-Large</text>
+<text class="lb" x="409" y="169" text-anchor="end">GPT-3 175B</text>
+<text class="lb" x="484" y="142" text-anchor="end">PaLM 540B</text>
+<text class="lb" x="523" y="117" text-anchor="end">GPT-4</text>
+<text class="lb" x="556" y="84" text-anchor="end">Gemini Ultra</text>
+<text class="lb" x="602" y="122">Llama 3.1 405B</text>
+</svg>
+<figcaption><b>Figure 3.</b> About eight orders of magnitude in twelve years. Marker shape encodes provenance: circles are developer-reported, triangles are third-party estimates. Hover a marker for its value. The 2025–26 band is drawn as a range, not as points, because it is not lab-disclosed.</figcaption>
+</figure>
+
+<p>Epoch's own estimates put GPT-4 at about 2e25 FLOP and Gemini Ultra at about 5e25, against GPT-3's roughly 3e23 in 2020. <span class="tag hi">HIGH</span> A secondary analysis places 2026 frontier runs in the 1e26 to 1e27 window. <span class="tag lo">LOW</span></p>
+
+<h3>The physical stack, bottom to top</h3>
+<div class="tablewrap">
+<table>
+<thead><tr><th>Layer</th><th>What it is</th><th>Typical binding constraint</th></tr></thead>
+<tbody>
+<tr><td>Power and datacenter</td><td>Gigawatt-scale sites, cooling, grid interconnect</td><td>Energy availability, build time</td></tr>
+<tr><td>Accelerators</td><td>GPUs and TPUs with high-bandwidth memory (HBM)</td><td>Chip and HBM supply, advanced packaging</td></tr>
+<tr><td>Interconnect</td><td>NVLink, InfiniBand or Ethernet fabrics linking tens of thousands of chips</td><td>All-to-all bandwidth during training</td></tr>
+<tr><td>Systems software</td><td>CUDA / ROCm, PyTorch or JAX, parallelism frameworks</td><td>Utilization, fault recovery at scale</td></tr>
+<tr><td>Model</td><td>Architecture plus trained weights</td><td>Data quality, algorithmic efficiency</td></tr>
+<tr><td>Serving</td><td>vLLM, TensorRT-LLM, llama.cpp, quantization</td><td>Memory bandwidth, KV cache size</td></tr>
+<tr><td>Orchestration and app</td><td>Context assembly, tools, agents, user interface</td><td>Reliability, security, cost per task</td></tr>
+</tbody>
+</table>
+</div>
+<p>The "binding constraint" column is synthesis, not a sourced ranking. <span class="tag md">MED</span></p>
+
+<h2 id="implement" class="s4">4. Implementation: the model is one component</h2>
+<p>A deployed AI product is mostly conventional software wrapped around the model call. The model is stateless and knows only what is in its <span class="term">context window</span> on that pass. Everything that feels like knowledge of your files, memory of past conversations, or the ability to act is the orchestration layer putting text into that window and executing what comes out.</p>
+
+<figure>
+<svg viewBox="0 0 680 306" role="img" aria-labelledby="f4t f4d">
+<title id="f4t">AI implementation architecture</title>
+<desc id="f4d">Top row: user or app, orchestrator, model. Bottom row: instructions, retrieval and memory feed the orchestrator; tools exchange calls and results with the model. Retrieval and tools are marked as the entry points for untrusted content.</desc>
+<rect x="40" y="40" width="130" height="56" rx="6" fill="var(--fn)" stroke="var(--axis)" stroke-width="1.3"/><text class="h" x="105" y="58" text-anchor="middle" dominant-baseline="central">User or app</text><text class="s" x="105" y="78" text-anchor="middle" dominant-baseline="central">Sends request</text>
+<rect x="230" y="40" width="190" height="56" rx="6" fill="var(--fb)" stroke="var(--blue)" stroke-width="1.3"/><text class="h" x="325" y="58" text-anchor="middle" dominant-baseline="central">Orchestrator</text><text class="s" x="325" y="78" text-anchor="middle" dominant-baseline="central">Builds the context window</text>
+<rect x="480" y="40" width="160" height="56" rx="6" fill="var(--fb)" stroke="var(--blue)" stroke-width="1.3"/><text class="h" x="560" y="58" text-anchor="middle" dominant-baseline="central">Model</text><text class="s" x="560" y="78" text-anchor="middle" dominant-baseline="central">Generates tokens</text>
+<line x1="172" y1="68" x2="228" y2="68" stroke="var(--ink)" stroke-width="1.3" marker-start="url(#ar)" marker-end="url(#ar)"/>
+<line x1="422" y1="68" x2="478" y2="68" stroke="var(--ink)" stroke-width="1.3" marker-start="url(#ar)" marker-end="url(#ar)"/>
+<rect x="40" y="170" width="140" height="56" rx="6" fill="var(--fn)" stroke="var(--axis)" stroke-width="1.3"/><text class="h" x="110" y="188" text-anchor="middle" dominant-baseline="central">Instructions</text><text class="s" x="110" y="208" text-anchor="middle" dominant-baseline="central">System prompt</text>
+<rect x="200" y="170" width="140" height="56" rx="6" fill="var(--fa)" stroke="var(--amber)" stroke-width="2"/><text class="h" x="270" y="188" text-anchor="middle" dominant-baseline="central">Retrieval (RAG)</text><text class="s" x="270" y="208" text-anchor="middle" dominant-baseline="central">Docs, vector search</text>
+<rect x="360" y="170" width="110" height="56" rx="6" fill="var(--fn)" stroke="var(--axis)" stroke-width="1.3"/><text class="h" x="415" y="188" text-anchor="middle" dominant-baseline="central">Memory</text><text class="s" x="415" y="208" text-anchor="middle" dominant-baseline="central">Chat history</text>
+<rect x="500" y="170" width="140" height="56" rx="6" fill="var(--fa)" stroke="var(--amber)" stroke-width="2"/><text class="h" x="570" y="188" text-anchor="middle" dominant-baseline="central">Tools</text><text class="s" x="570" y="208" text-anchor="middle" dominant-baseline="central">Code, search, APIs</text>
+<path d="M110 170 L110 135 L415 135 L415 170" fill="none" stroke="var(--ink)" stroke-width="1.3"/>
+<line x1="270" y1="170" x2="270" y2="135" stroke="var(--ink)" stroke-width="1.3"/>
+<line x1="325" y1="135" x2="325" y2="98" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<line x1="530" y1="96" x2="530" y2="168" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<line x1="585" y1="170" x2="585" y2="98" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<text class="s" x="522" y="135" text-anchor="end" dominant-baseline="central">call</text>
+<text class="s" x="593" y="135" dominant-baseline="central">result</text>
+<rect x="40" y="252" width="12" height="12" rx="2" fill="var(--fa)" stroke="var(--amber)" stroke-width="2"/>
+<text class="s" x="60" y="258" dominant-baseline="central">Amber = where untrusted external content enters the context</text>
+<text class="s" x="40" y="286" dominant-baseline="central">↻ Agent loop: tool result re-enters the context and the model runs again until done</text>
+</svg>
+<figcaption><b>Figure 4.</b> The orchestrator assembles instructions, retrieved documents and history into one context window. Tools close the loop that makes a model an agent.</figcaption>
+</figure>
+
+<h3>Implementation patterns, in increasing order of autonomy and risk</h3>
+<ul>
+  <li><span class="term">Prompting.</span> Instructions plus the request. It is the cheapest lever and is often underused.</li>
+  <li><span class="term">Retrieval-augmented generation (RAG).</span> Relevant documents are fetched and pasted into the context, so answers are grounded in current or private data without retraining.</li>
+  <li><span class="term">Fine-tuning.</span> Small additional training, such as LoRA adapters. It changes format, tone or a narrow skill, and is a poor fit for injecting facts.</li>
+  <li><span class="term">Tool use.</span> The model emits a structured call, the orchestrator executes it and returns the result. The Model Context Protocol (MCP) standardizes this interface.</li>
+  <li><span class="term">Agents.</span> Tool use in a loop, with the model deciding the next step. Per-step errors compound and cost scales with loop length. If each step succeeds with probability p, a chain of N independent steps succeeds at most p<sup>N</sup> of the time, which is an upper bound on decay rather than a forecast.</li>
+</ul>
+
+<div class="callout sec">
+  <p style="margin:0"><span class="term">Security note: the lethal trifecta.</span> An agent becomes dangerous when three things coincide: access to private data, exposure to untrusted content, and the ability to act autonomously. In Figure 4, retrieval and tool results are the entry points for untrusted content, and tools are also the action surface. The risk therefore concentrates in the orchestration layer, not in the model.</p>
+</div>
+
+<h3>Where the weights run: three deployment modes</h3>
+<div class="tablewrap">
+<table>
+<thead><tr><th>Mode</th><th>Who holds the weights</th><th>Cost shape</th><th>Trade-off</th><th>Routing lane</th></tr></thead>
+<tbody>
+<tr><td>Local open weights</td><td>You (llama.cpp, Ollama, quantized to fit consumer VRAM)</td><td>Hardware capex, near-zero marginal cost</td><td>Private and free per token; capability capped by memory</td><td>Lane 1</td></tr>
+<tr><td>Hosted open weights</td><td>A cloud host behind a router</td><td>Low per-token opex</td><td>Cheap and capable; endpoint reliability varies</td><td>Lane 2</td></tr>
+<tr><td>Closed frontier API</td><td>The lab only</td><td>Highest per-token opex</td><td>Top capability; no weight access</td><td>Lane 3</td></tr>
+</tbody>
+</table>
+</div>
+<p>The routing decision across these modes is an intelligence-per-dollar question: cost per unit of completed task, including endpoint reliability, rather than headline capability.</p>
+
+
+<h2 id="resolve" class="s6">6. How a model reads one token, and where backpropagation fits</h2>
+<p>A common mental model is that a language model "reads" a character such as <span class="term">A</span>, tries several interpretations, and backtracks when one fails. The real mechanism is different in two ways. First, the model never sees a shape: the tokenizer hands it an integer ID, and the work is deciding what that ID means <em>here</em> (the article "a", the letter's name, a grade, a blood type, a musical note, a variable). Second, within a single forward pass nothing backtracks. Each layer rewrites the token's vector, so an early, generic reading is overwritten by a context-specific one. Interpretability researchers call reading those intermediate states out the <span class="term">logit lens</span>; the process itself is <span class="term">iterative refinement in the residual stream</span>.</p>
+
+<figure>
+<div class="ctl"><span>Layer</span><input type="range" id="ly" min="0" max="6" step="1" value="3" aria-label="Transformer layer"><b id="lyl">3 of 6</b></div>
+<svg viewBox="0 0 680 200" role="img" aria-labelledby="f5t f5d">
+<title id="f5t">Attention from the token A to its context, by layer</title>
+<desc id="f5d">Sentence: She got an A on the exam. Curved lines from the A position to other tokens grow thicker on got and exam as the layer index rises.</desc>
+<text class="s" x="40" y="24">Sentence: "She got an A on the exam." — the amber token is the one being resolved</text>
+<g id="lines"></g>
+<g id="toks"></g>
+<text class="s" x="340" y="192" text-anchor="middle">Line thickness = how much the "A" position reads from each token at this layer</text>
+</svg>
+<div class="bars" id="bars"></div>
+<div class="lnote" id="lnote"></div>
+<figcaption><b>Figure 5.</b> Per-layer resolution of one token. The web edition is interactive: drag the layer slider. The PDF edition shows layer 3, where the reading flips from "letter" to "grade". Values are illustrative, not measured from a real model.</figcaption>
+</figure>
+
+<p>Two things to notice. The "article" reading at layer 0 was never wrong: it was the correct prior with no context. And the flip at layer 3 is not a decision the model could revisit; it is arithmetic. Attention added the "exam" vector into the "A" position, and the sum now points in the "grade" direction.</p>
+
+<p>Recognizing A as a <em>shape</em> is the job of a vision encoder in a multimodal model. It is also a single forward pass, but the hierarchy is spatial rather than contextual, and it is the one place where the picture of competing hypotheses is closest to literal.</p>
+
+<figure>
+<svg viewBox="0 0 680 200" role="img" aria-labelledby="f6t f6d">
+<title id="f6t">Vision path for the letter A</title>
+<desc id="f6d">Left to right: a pixel patch grid containing an A, edge features, stroke features for left diagonal, right diagonal, crossbar and apex join, and a hypothesis bar chart where A wins over H, Lambda and 4.</desc>
+<text class="h" x="95" y="30" text-anchor="middle">1. Pixels → patches</text>
+<g stroke="var(--rule)" stroke-width="0.7" fill="var(--bg)">
+<rect x="40" y="48" width="110" height="110"/>
+<line x1="62" y1="48" x2="62" y2="158"/><line x1="84" y1="48" x2="84" y2="158"/><line x1="106" y1="48" x2="106" y2="158"/><line x1="128" y1="48" x2="128" y2="158"/>
+<line x1="40" y1="70" x2="150" y2="70"/><line x1="40" y1="92" x2="150" y2="92"/><line x1="40" y1="114" x2="150" y2="114"/><line x1="40" y1="136" x2="150" y2="136"/>
+</g>
+<path d="M56 150 L95 58 L134 150" fill="none" stroke="var(--ink)" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>
+<line x1="72" y1="118" x2="118" y2="118" stroke="var(--ink)" stroke-width="8" stroke-linecap="round"/>
+<text class="s" x="95" y="178" text-anchor="middle">Each cell → one vector</text>
+<line x1="158" y1="103" x2="188" y2="103" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<text class="h" x="255" y="30" text-anchor="middle">2. Edges</text>
+<rect x="200" y="48" width="110" height="110" rx="6" fill="var(--fb)" stroke="var(--blue)"/>
+<g stroke="var(--blue)" stroke-width="2.2" stroke-linecap="round">
+<line x1="220" y1="140" x2="240" y2="95"/><line x1="240" y1="95" x2="255" y2="62"/>
+<line x1="255" y1="62" x2="270" y2="95"/><line x1="270" y1="95" x2="290" y2="140"/>
+<line x1="232" y1="118" x2="278" y2="118"/>
+</g>
+<text class="s" x="255" y="178" text-anchor="middle">Orientation, contrast</text>
+<line x1="318" y1="103" x2="348" y2="103" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<text class="h" x="415" y="30" text-anchor="middle">3. Strokes</text>
+<rect x="360" y="48" width="110" height="26" rx="5" fill="var(--fp)" stroke="var(--purple)"/><text class="s" x="415" y="61" text-anchor="middle" dominant-baseline="central">Left diagonal ✓</text>
+<rect x="360" y="78" width="110" height="26" rx="5" fill="var(--fp)" stroke="var(--purple)"/><text class="s" x="415" y="91" text-anchor="middle" dominant-baseline="central">Right diagonal ✓</text>
+<rect x="360" y="108" width="110" height="26" rx="5" fill="var(--fp)" stroke="var(--purple)"/><text class="s" x="415" y="121" text-anchor="middle" dominant-baseline="central">Crossbar ✓</text>
+<rect x="360" y="138" width="110" height="26" rx="5" fill="var(--fp)" stroke="var(--purple)"/><text class="s" x="415" y="151" text-anchor="middle" dominant-baseline="central">Apex join ✓</text>
+<text class="s" x="415" y="178" text-anchor="middle">Mid-layer features</text>
+<line x1="478" y1="103" x2="508" y2="103" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<text class="h" x="580" y="30" text-anchor="middle">4. Hypotheses</text>
+<text class="s" x="522" y="61" dominant-baseline="central">A</text><rect x="540" y="53" width="100" height="16" rx="3" fill="var(--grid)"/><rect x="540" y="53" width="88" height="16" rx="3" fill="var(--green)"/>
+<text class="s" x="522" y="91" dominant-baseline="central">H</text><rect x="540" y="83" width="100" height="16" rx="3" fill="var(--grid)"/><rect x="540" y="83" width="6" height="16" rx="3" fill="var(--pt-blue)"/>
+<text class="s" x="522" y="121" dominant-baseline="central">Λ</text><rect x="540" y="113" width="100" height="16" rx="3" fill="var(--grid)"/><rect x="540" y="113" width="4" height="16" rx="3" fill="var(--pt-blue)"/>
+<text class="s" x="522" y="151" dominant-baseline="central">4</text><rect x="540" y="143" width="100" height="16" rx="3" fill="var(--grid)"/><rect x="540" y="143" width="2" height="16" rx="3" fill="var(--pt-blue)"/>
+<text class="s" x="580" y="178" text-anchor="middle">Crossbar kills Λ, apex kills H</text>
+</svg>
+<figcaption><b>Figure 6.</b> Spatial hierarchy in a vision encoder. Λ and H are not tried and abandoned; their evidence is simply outweighed in the same forward sum.</figcaption>
+</figure>
+
+<h3>The correct terms</h3>
+<div class="tablewrap">
+<table>
+<thead><tr><th>What is happening</th><th>Term</th><th>Where it runs</th></tr></thead>
+<tbody>
+<tr><td>Token meaning refined layer by layer</td><td>Iterative refinement in the residual stream; read out with the logit lens or tuned lens</td><td>Inference, inside one forward pass</td></tr>
+<tr><td>Competing readings coexisting until one dominates</td><td>Superposition of features, resolved by contextualization</td><td>Inference, inside one forward pass</td></tr>
+<tr><td>Model writes a hypothesis, then corrects it</td><td>Self-correction, self-verification, reflection</td><td>Inference, in the output tokens</td></tr>
+<tr><td>Several candidate continuations kept, losers dropped</td><td>Beam search; search over reasoning paths (tree of thoughts, best-of-N)</td><td>Inference, across candidate outputs</td></tr>
+<tr><td>Error pushed back through the layers to adjust weights</td><td><b>Backpropagation</b>, with gradient descent as the update rule</td><td>Training only</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>So the process that resembles backtracking through the layers is <span class="term">backpropagation</span>, and it happens only during training. After a wrong prediction, the backward pass computes how much each weight contributed to the error, layer by layer from the output back to the input, and gradient descent nudges each one. It is how the stroke detectors in Figure 6 were learned. Once the weights are frozen for deployment it never runs again.</p>
+
+<figure>
+<svg viewBox="0 0 680 232" role="img" aria-labelledby="f7t f7d">
+<title id="f7t">One training step: forward pass, loss, backward pass, update</title>
+<desc id="f7d">Forward pass produces a prediction, the loss compares it to the correct token, backpropagation sends the error back through every layer, and gradient descent updates the weights. A note states that the backward side costs about twice the forward side.</desc>
+<rect x="40" y="40" width="130" height="56" rx="6" fill="var(--fb)" stroke="var(--blue)" stroke-width="1.3"/><text class="h" x="105" y="58" text-anchor="middle" dominant-baseline="central">Forward pass</text><text class="s" x="105" y="78" text-anchor="middle" dominant-baseline="central">Predict next token</text>
+<rect x="210" y="40" width="130" height="56" rx="6" fill="var(--fa)" stroke="var(--amber)" stroke-width="1.3"/><text class="h" x="275" y="58" text-anchor="middle" dominant-baseline="central">Loss</text><text class="s" x="275" y="78" text-anchor="middle" dominant-baseline="central">vs. the true token</text>
+<rect x="380" y="40" width="130" height="56" rx="6" fill="var(--fp)" stroke="var(--purple)" stroke-width="1.3"/><text class="h" x="445" y="58" text-anchor="middle" dominant-baseline="central">Backpropagation</text><text class="s" x="445" y="78" text-anchor="middle" dominant-baseline="central">Gradient per weight</text>
+<rect x="550" y="40" width="90" height="56" rx="6" fill="var(--fg)" stroke="var(--green)" stroke-width="1.3"/><text class="h" x="595" y="58" text-anchor="middle" dominant-baseline="central">Update</text><text class="s" x="595" y="78" text-anchor="middle" dominant-baseline="central">Nudge weights</text>
+<line x1="170" y1="68" x2="208" y2="68" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<line x1="340" y1="68" x2="378" y2="68" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<line x1="510" y1="68" x2="548" y2="68" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<path d="M595 96 L595 130 L105 130 L105 98" fill="none" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<text class="s" x="350" y="150" text-anchor="middle" dominant-baseline="central">↻ Repeated for trillions of tokens; the loop stops when the weights are frozen for release</text>
+<rect x="40" y="172" width="600" height="40" rx="6" fill="var(--bg2)" stroke="var(--rule)"/>
+<text class="s" x="340" y="186" text-anchor="middle" dominant-baseline="central">Cost: the backward side is about 2× the forward side, so a training token costs ≈ 3× an inference token,</text>
+<text class="s" x="340" y="202" text-anchor="middle" dominant-baseline="central">and needs full-precision weights plus optimizer state in memory. Inference can run quantized on frozen weights.</text>
+</svg>
+<figcaption><b>Figure 7.</b> Backpropagation is the training-time loop. Its roughly 3× per-token cost and memory footprint are the mechanical root of the capex/opex split in Figure 1.</figcaption>
+</figure>
+
+<h2 id="provenance" class="s5">7. Provenance and confidence</h2>
+<ul class="prov">
+  <li><span class="tag hi">HIGH</span>Lifecycle structure, transformer loop, prefill/decode asymmetry, KV cache role, implementation patterns. Stable, widely documented engineering.</li>
+  <li><span class="tag hi">HIGH</span>The 5× per year compute trend and the GPT-3, GPT-4 and Gemini Ultra compute figures, checked against Epoch AI pages on 19 Sep 2026. The GPT-4 and Gemini Ultra figures are Epoch estimates, not lab disclosures.</li>
+  <li><span class="tag md">MED</span>The AlexNet, Transformer, BERT-Large, PaLM and Llama 3.1 405B chart points are from recall of the source papers and Epoch's dataset and were not re-pulled for this revision. PaLM and Llama are developer-reported values; the other three are third-party estimates.</li>
+  <li><span class="tag md">MED</span>The stack table's "binding constraint" column is the author's synthesis.</li>
+  <li><span class="tag hi">HIGH</span>Section 6 mechanism: one-directional forward pass, residual-stream refinement, logit lens as a read-out, and the placement of backpropagation, self-correction and search. Standard usage in the ML and interpretability literature.</li>
+  <li><span class="tag md">MED</span>The ≈3× training-to-inference cost per token is the standard rule of thumb (forward ≈ 2·N·D FLOP, full step ≈ 6·N·D), not a measured figure for any named model.</li>
+  <li><span class="tag lo">LOW</span>The per-layer percentages and attention weights in Figure 5 and the hypothesis bars in Figure 6 are illustrative constructions, not measurements.</li>
+  <li><span class="tag lo">LOW</span>The 2025–26 band of 1e26 to 1e27 FLOP comes from a single secondary consultancy write-up citing Epoch, not from lab disclosure.</li>
+</ul>
+
+<h3>Sources</h3>
+<ul>
+  <li><a href="https://epoch.ai/trends">Epoch AI — Trends in Artificial Intelligence</a> (compute growth rate, doubling time, cost and power growth)</li>
+  <li><a href="https://epoch.ai/publications/training-compute-of-frontier-ai-models-grows-by-4-5x-per-year">Epoch AI — Training compute of frontier AI models grows by 4–5× per year</a> (GPT-3, GPT-4, Gemini Ultra estimates)</li>
+  <li><a href="https://epoch.ai/data/ai-models">Epoch AI — Data on AI Models</a> (notable models dataset)</li>
+  <li><a href="https://deluair.com/consultancy/insights/frontier-ai-training-cost-2026">Deluair Consultancy — Frontier AI training cost trajectory 2026</a> (secondary source for the 2025–26 band)</li>
+</ul>
+
+<footer>
+  How AI Is Built and Implemented · REV 1.1 · 19 September 2026 · Vendor-reported and third-party figures are kept distinct throughout.
+</footer>
+
+</div>
+<script>
+(function(){
+  var KEY='ai-doc-theme', root=document.documentElement, btns=document.querySelectorAll('.seg button');
+  function apply(mode){
+    if(mode==='light'||mode==='dark'){root.setAttribute('data-theme',mode);}else{root.removeAttribute('data-theme');mode='auto';}
+    btns.forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-set')===mode));});
+  }
+  var saved=null; try{saved=localStorage.getItem(KEY);}catch(e){}
+  apply(saved||'auto');
+  btns.forEach(function(b){b.addEventListener('click',function(){var m=b.getAttribute('data-set');try{localStorage.setItem(KEY,m);}catch(e){}apply(m);});});
+})();
+</script>
+<script>
+(function(){
+const T=['She','got','an','A','on','the','exam','.'];
+const ATT=[[0,0,0,1,0,0,0,0],[.10,.15,.50,.20,.03,.02,0,0],[.05,.35,.35,.10,.05,0,.10,0],[.03,.30,.15,.05,.02,0,.45,0],[.02,.30,.10,.03,.02,0,.53,0],[.02,.25,.08,.03,.02,0,.60,0],[.02,.22,.06,.03,.02,0,.65,0]];
+const H=['Article "a"','Letter name','Grade / score','Blood type / other'];
+const P=[[.45,.30,.15,.10],[.30,.40,.20,.10],[.10,.40,.40,.10],[.04,.21,.70,.05],[.02,.10,.86,.02],[.01,.06,.91,.02],[.01,.04,.93,.02]];
+const NOTE=['Embedding only. The ID for "A" carries every past use of the token at once, mostly the article, since that is its commonest use in training text. No context yet.',
+'Attention to "an" arrives. An article cannot follow an article, so the "article" reading loses mass. Still ambiguous between letter and grade.',
+'"got" is now in view: something was received. Letter-name and grade tie. Nothing has been undone; the vector has been rewritten.',
+'"exam" dominates attention. Grade jumps to 70%. This is the layer where the reading effectively flips.',
+'Later layers sharpen rather than change the answer. Residual mass on "letter" reflects that a grade A is also, literally, the letter.',
+'Near-final state. If this were the last position, the next-token probabilities would favor continuations like "plus", "minus", "and".',
+'Output. One direction only: no layer ever re-ran an earlier layer. Revision, if any, happens in the tokens the model writes next.'];
+const X=[70,150,225,300,375,450,540,620];
+const cs=getComputedStyle(document.documentElement);
+function draw(l){
+ let s='',k='';
+ T.forEach(function(t,i){const w=ATT[l][i];
+  if(i!==3&&w>0){s+='<path d="M300 118 Q '+((300+X[i])/2)+' 60 '+X[i]+' 118" fill="none" stroke="var(--pt-blue)" stroke-width="'+(1+w*10).toFixed(1)+'" opacity="'+(0.25+w).toFixed(2)+'" stroke-linecap="round"/>';}
+  const f=i===3?'var(--fa)':'var(--fn)',st=i===3?'var(--amber)':'var(--axis)';
+  k+='<rect x="'+(X[i]-32)+'" y="120" width="64" height="34" rx="6" fill="'+f+'" stroke="'+st+'" stroke-width="'+(i===3?2:1)+'"/><text class="h" x="'+X[i]+'" y="137" text-anchor="middle" dominant-baseline="central">'+t+'</text>';
+  if(i!==3&&w>0)k+='<text class="s" x="'+X[i]+'" y="170" text-anchor="middle">'+Math.round(w*100)+'%</text>';});
+ document.getElementById('lines').innerHTML=s;document.getElementById('toks').innerHTML=k;
+ const mx=Math.max.apply(null,P[l]);
+ document.getElementById('bars').innerHTML=H.map(function(h,i){return '<span>'+h+'</span><div class="bar '+(P[l][i]===mx?'win':'')+'"><i style="width:'+(P[l][i]*100)+'%"></i></div><span style="text-align:right">'+Math.round(P[l][i]*100)+'%</span>';}).join('');
+ document.getElementById('lyl').textContent=l===0?'0 · embedding':l+' of 6';
+ document.getElementById('lnote').textContent='Layer '+l+': '+NOTE[l];
+}
+const r=document.getElementById('ly');r.addEventListener('input',function(e){draw(+e.target.value);});draw(+r.value);
+})();
+</script>
+</body>
+</html>
