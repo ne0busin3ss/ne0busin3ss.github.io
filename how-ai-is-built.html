@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>How AI Is Built and Implemented — REV 1.1</title>
+<title>How AI Is Built and Implemented — REV 1.2</title>
 <meta name="description" content="High-level overview of how modern AI systems are built (data, pretraining, post-training, evaluation) and implemented (serving, orchestration, applications), with diagrams, a training-compute chart, and confidence-tagged provenance.">
 <style>
 :root{
@@ -50,7 +50,7 @@ nav.toc strong{display:block;font-size:13px;letter-spacing:.06em;text-transform:
 nav.toc ol{margin:0;padding-left:20px}
 nav.toc a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--blue);text-underline-offset:3px}
 h2{font-size:25px;line-height:1.25;margin:44px 0 12px;padding-left:12px;border-left:5px solid var(--blue);color:var(--ink)}
-h2.s2{border-left-color:var(--purple)} h2.s3{border-left-color:var(--amber)} h2.s4{border-left-color:var(--green)} h2.s5{border-left-color:var(--cyan)} h2.s6{border-left-color:var(--red)}
+h2.s2{border-left-color:var(--purple)} h2.s3{border-left-color:var(--amber)} h2.s4{border-left-color:var(--green)} h2.s5{border-left-color:var(--cyan)} h2.s6{border-left-color:var(--red)} h2.s7{border-left-color:var(--purple)}
 h3{font-size:18px;margin:26px 0 8px;color:var(--ink)}
 p{margin:0 0 14px}
 ul{margin:0 0 16px;padding-left:22px}
@@ -78,7 +78,10 @@ td:first-child{font-weight:650;white-space:nowrap}
 .callout{border:1px solid var(--rule);border-left:5px solid var(--amber);background:var(--bg);padding:12px 16px;margin:18px 0 22px;border-radius:0 8px 8px 0}
 .callout.sec{border-left-color:var(--red)}
 .tag{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.05em;padding:1px 8px;border-radius:4px;border:2px solid;background:var(--bg);color:var(--ink);vertical-align:1px;margin-right:6px}
-.tag.hi{border-color:var(--green)} .tag.md{border-color:var(--amber)} .tag.lo{border-color:var(--red)}
+.tag.hi{border-color:var(--green)} .tag.md{border-color:var(--amber)} .tag.lo{border-color:var(--red)} .tag.un{border-color:var(--purple)} .tag.st{border-color:var(--green)} .tag.pa{border-color:var(--amber)} .tag.ra{border-color:var(--red)}
+.evbox{border:1px solid var(--rule);border-left:5px solid var(--red);border-radius:0 8px 8px 0;padding:12px 16px;margin:18px 0 22px;background:var(--bg2)}
+.evbox ul{margin:6px 0 0}
+.evbox li{margin-bottom:8px;font-size:15px}
 .prov li{margin-bottom:11px}
 footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-size:13.5px;color:var(--ink2)}
 
@@ -127,7 +130,7 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
   <h1>How AI Is Built and Implemented</h1>
   <p class="sub">The lifecycle, the mechanism inside the model, the scale economics, and the software layer that turns a model into a product.</p>
   <div class="meta">
-    <span class="pill rev">REV 1.1</span>
+    <span class="pill rev">REV 1.2</span>
     <span class="pill">19 September 2026</span>
     <span class="pill">Confidence-tagged · provenance at end</span>
     <a class="dl" href="how-ai-is-built-light.pdf" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4M4 19h16"/></svg>Download PDF · light</a>
@@ -142,6 +145,7 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
     <li><a href="#inside">Inside the model: one pass per token</a></li>
     <li><a href="#scale">Scale: why building is a capital project</a></li>
     <li><a href="#implement">Implementation: the model is one component</a></li>
+    <li><a href="#security">The security layer: prominent, specified, not yet deployed</a></li>
     <li><a href="#resolve">How a model reads one token, and where backpropagation fits</a></li>
     <li><a href="#provenance">Provenance and confidence</a></li>
   </ol>
@@ -334,7 +338,7 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
 </ul>
 
 <div class="callout sec">
-  <p style="margin:0"><span class="term">Security note: the lethal trifecta.</span> An agent becomes dangerous when three things coincide: access to private data, exposure to untrusted content, and the ability to act autonomously. In Figure 4, retrieval and tool results are the entry points for untrusted content, and tools are also the action surface. The risk therefore concentrates in the orchestration layer, not in the model.</p>
+  <p style="margin:0"><span class="term">Security note: the lethal trifecta.</span> An agent becomes dangerous when three things coincide: access to private data, exposure to untrusted content, and the ability to act autonomously. In Figure 4, retrieval and tool results are the entry points for untrusted content, and tools are also the action surface. The risk therefore concentrates in the orchestration layer, not in the model. Section 5 treats this as a layer in its own right.</p>
 </div>
 
 <h3>Where the weights run: three deployment modes</h3>
@@ -351,7 +355,116 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
 <p>The routing decision across these modes is an intelligence-per-dollar question: cost per unit of completed task, including endpoint reliability, rather than headline capability.</p>
 
 
-<h2 id="resolve" class="s6">6. How a model reads one token, and where backpropagation fits</h2>
+<h2 id="security" class="s6">5. The security layer: prominent, specified, not yet deployed</h2>
+<p>Figures 1 and 4 have no security component, and that omission mirrors the field. As of September 2026 the controls for AI systems are well specified in OWASP's Top 10 for LLM and Agentic Applications, MITRE ATLAS and the NIST AI Risk Management Framework, yet the incident record shows them deployed unevenly, and one class of threat has no complete fix at any layer. This is now a prominent issue that needs to be addressed, not a footnote to the architecture. The evidence divides into three tiers, and each carries a different status.</p>
+
+<div class="evbox">
+  <p style="margin:0 0 4px"><span class="term">2026 evidence.</span> Figures are as reported by the cited source; most sources sell security products or research, so treat counts as indicative.</p>
+  <ul>
+    <li><span class="tag hi">HIGH</span>Prompt injection maps to six of the ten OWASP agentic categories and is described by OWASP's own researchers as unsolved. Root cause: the model receives system prompt, user text and retrieved content as one token stream with no channel that separates command from data.</li>
+    <li><span class="tag md">MED</span>MCP authentication is optional in the protocol; the July 2026 spec revision leaves permission models, rate limiting and response integrity to the ecosystem. About 7,000 MCP servers were found reachable on the public internet; 14 CVEs by Q3 2026, over 30 remote-code-execution issues sharing one root cause.</li>
+    <li><span class="tag hi">HIGH</span>Supply chain: a backdoored postmark-mcp package reached roughly 300 organizations; a LiteLLM PyPI backdoor was downloaded about 47,000 times in three hours.</li>
+    <li><span class="tag hi">HIGH</span>Insecure output handling: Microsoft's Semantic Kernel shipped two remote-code-execution flaws (CVE-2026-26030, CVE-2026-25592) where model-influenced strings reached an interpreter. Microsoft's remediation guidance is the textbook control: treat any model-influenced tool parameter as attacker-controlled input.</li>
+    <li><span class="tag md">MED</span>Governance: only 37% of organizations surveyed by OWASP contributors have policies to detect shadow AI deployments.</li>
+    <li><span class="tag lo">LOW</span>An estimate of over 200,000 MCP servers potentially compromisable through SDK flaws is an extrapolation, not a scan.</li>
+  </ul>
+</div>
+
+<h3>Three tiers of status</h3>
+<ul>
+  <li><span class="term">Tier 1: specified, solvable, not deployed at scale.</span> Authentication, least privilege, egress control, sandboxing, dependency pinning, spend caps and audit logging. These are ordinary security engineering. The gap is adoption, not invention.</li>
+  <li><span class="term">Tier 2: unsolved at the model level.</span> Prompt injection. Filters and classifiers reduce it; nothing eliminates it, because the weakness is architectural (Section 6). The only structural defense is to separate the model that reads untrusted content from the model that can act, and that pattern is rare in production.</li>
+  <li><span class="term">Tier 3: deployed but vendor-reported.</span> Build-side controls: safety evaluations, red-teaming, refusal training. Frontier labs report these in place and some independent testing exists. They belong in a separate column from the deploy-side gap and are not independently verifiable at the level of detail a buyer would want.</li>
+</ul>
+
+<figure>
+<svg viewBox="0 0 680 400" role="img" aria-labelledby="f5at f5ad">
+<title id="f5at">Defense in depth for an AI system, with deployment status</title>
+<desc id="f5ad">Five horizontal bands from outside in: perimeter, content, action, supply chain, observability. Each names its controls and carries a status badge: partial, unsolved, rare, rare, partial.</desc>
+<rect x="40" y="30" width="480" height="52" rx="8" fill="var(--fb)" stroke="var(--blue)" stroke-width="1.3"/>
+<text class="h" x="56" y="49" dominant-baseline="central">Perimeter</text>
+<text class="s" x="56" y="68" dominant-baseline="central">Input classifiers · egress allow-list · no external images</text>
+<rect x="540" y="44" width="100" height="24" rx="12" fill="var(--bg)" stroke="var(--amber)" stroke-width="2"/><text class="s" x="590" y="56" text-anchor="middle" dominant-baseline="central" font-weight="700">Partial</text>
+<rect x="40" y="94" width="480" height="52" rx="8" fill="var(--fa)" stroke="var(--amber)" stroke-width="1.3"/>
+<text class="h" x="56" y="113" dominant-baseline="central">Content</text>
+<text class="s" x="56" y="132" dominant-baseline="central">Retrieved docs and tool results treated as data · dual-model isolation</text>
+<rect x="540" y="108" width="100" height="24" rx="12" fill="var(--bg)" stroke="var(--purple)" stroke-width="2"/><text class="s" x="590" y="120" text-anchor="middle" dominant-baseline="central" font-weight="700">Unsolved</text>
+<rect x="40" y="158" width="480" height="52" rx="8" fill="var(--fg)" stroke="var(--green)" stroke-width="1.3"/>
+<text class="h" x="56" y="177" dominant-baseline="central">Action</text>
+<text class="s" x="56" y="196" dominant-baseline="central">Least-privilege scopes · read-only default · human gate · sandbox</text>
+<rect x="540" y="172" width="100" height="24" rx="12" fill="var(--bg)" stroke="var(--red)" stroke-width="2"/><text class="s" x="590" y="184" text-anchor="middle" dominant-baseline="central" font-weight="700">Rare</text>
+<rect x="40" y="222" width="480" height="52" rx="8" fill="var(--fp)" stroke="var(--purple)" stroke-width="1.3"/>
+<text class="h" x="56" y="241" dominant-baseline="central">Supply chain</text>
+<text class="s" x="56" y="260" dominant-baseline="central">Authenticated MCP servers · pinned dependencies · signed weights</text>
+<rect x="540" y="236" width="100" height="24" rx="12" fill="var(--bg)" stroke="var(--red)" stroke-width="2"/><text class="s" x="590" y="248" text-anchor="middle" dominant-baseline="central" font-weight="700">Rare</text>
+<rect x="40" y="286" width="480" height="52" rx="8" fill="var(--fc)" stroke="var(--cyan)" stroke-width="1.3"/>
+<text class="h" x="56" y="305" dominant-baseline="central">Observability</text>
+<text class="s" x="56" y="324" dominant-baseline="central">Prompt and tool-call logging · spend caps · alerts · playbook</text>
+<rect x="540" y="300" width="100" height="24" rx="12" fill="var(--bg)" stroke="var(--amber)" stroke-width="2"/><text class="s" x="590" y="312" text-anchor="middle" dominant-baseline="central" font-weight="700">Partial</text>
+<text class="s" x="40" y="356" dominant-baseline="central">Status = author's assessment of typical 2026 production deployments, from the evidence above.</text>
+<text class="s" x="40" y="374" dominant-baseline="central">Partial: common but inconsistent. Rare: specified, seldom deployed. Unsolved: no complete control exists.</text>
+</svg>
+<figcaption><b>Figure 5.</b> Defense in depth, outside in. Every band is specified in OWASP, ATLAS or NIST guidance; the badges record how often it is found in practice.</figcaption>
+</figure>
+
+<h3>Build-side threats and controls</h3>
+<div class="tablewrap">
+<table>
+<thead><tr><th>Threat</th><th>Where it enters</th><th>Control</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>Data poisoning, backdoors</td><td>Pretraining and fine-tuning data</td><td>Provenance filtering, dedup, canary strings, held-out backdoor evals</td><td><span class="tag pa">PARTIAL</span></td></tr>
+<tr><td>Malicious model files</td><td>Weight downloads; pickle-based formats can execute code on load</td><td>safetensors or GGUF only, checksum and signature verification, trusted hubs</td><td><span class="tag pa">PARTIAL</span></td></tr>
+<tr><td>Model theft, distillation</td><td>Inference endpoint</td><td>Rate limits, output watermarking, terms of service</td><td><span class="tag ra">WEAK</span></td></tr>
+<tr><td>Evaluation gaming</td><td>Benchmark contamination</td><td>Held-out and private evals, contamination checks</td><td><span class="tag pa">PARTIAL</span></td></tr>
+<tr><td>Unsafe capability</td><td>Post-training</td><td>Refusal training, constitutional methods, red-teaming, independent safety evals</td><td><span class="tag st">DEPLOYED</span> vendor-reported</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>Implement-side threats and controls</h3>
+<div class="tablewrap">
+<table>
+<thead><tr><th>Threat</th><th>Where it enters</th><th>Control</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>Direct prompt injection, jailbreaks</td><td>User input</td><td>Input classifiers, system-prompt hardening, output filtering</td><td><span class="tag pa">PARTIAL</span></td></tr>
+<tr><td>Indirect prompt injection</td><td>Retrieved documents, web pages, tool results, email</td><td>Treat fetched content as data; separate the model that reads from the model that acts</td><td><span class="tag un">UNSOLVED</span></td></tr>
+<tr><td>Data exfiltration</td><td>Tool calls, markdown image URLs, outbound requests</td><td>Egress allow-lists, no auto-rendered external images, tool-result redaction</td><td><span class="tag ra">RARE</span></td></tr>
+<tr><td>Excessive agency</td><td>Agent loop</td><td>Least-privilege tool scopes, read-only default, human approval on irreversible or financial actions</td><td><span class="tag ra">RARE</span></td></tr>
+<tr><td>Insecure output handling</td><td>Downstream code</td><td>Never eval or shell model output unsandboxed; parameterize; sandbox code execution</td><td><span class="tag pa">PARTIAL</span></td></tr>
+<tr><td>Supply chain: MCP servers, plugins, skills</td><td>Orchestration layer</td><td>Authentication on, pinned versions, third-party review, scoped credentials per server</td><td><span class="tag ra">RARE</span></td></tr>
+<tr><td>Secrets and billing exposure</td><td>API keys</td><td>Per-use-case keys, hard spend caps, no keys in prompts or repositories</td><td><span class="tag pa">PARTIAL</span></td></tr>
+<tr><td>Privacy and residency</td><td>Context window, logs</td><td>Data minimization, retention policy, zero-retention endpoints where offered</td><td><span class="tag pa">PARTIAL</span></td></tr>
+<tr><td>Observability</td><td>Everything</td><td>Log prompts, tool calls and outputs; anomaly alerts; incident playbook</td><td><span class="tag pa">PARTIAL</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>The architectural answer to Tier 2</h3>
+<p>Because no filter reliably separates instructions from data inside one context window, the defense that works is structural: two models with different privileges. A quarantined reader sees untrusted content but has no tools. A privileged actor has tools but never sees raw untrusted text, only structured output from the reader that the orchestrator validates against a schema. Injected instructions cannot reach anything that can act.</p>
+
+<figure>
+<svg viewBox="0 0 680 190" role="img" aria-labelledby="f5bt f5bd">
+<title id="f5bt">Dual-model pattern</title>
+<desc id="f5bd">Untrusted content flows to a quarantined reader with no tools, which emits structured output checked by the orchestrator against a schema, which flows to a privileged actor with tools, which produces actions. A barrier separates the reader side from the actor side.</desc>
+<rect x="40" y="50" width="120" height="56" rx="6" fill="var(--fa)" stroke="var(--amber)" stroke-width="2"/><text class="h" x="100" y="68" text-anchor="middle" dominant-baseline="central">Untrusted</text><text class="s" x="100" y="88" text-anchor="middle" dominant-baseline="central">Docs, web, email</text>
+<line x1="160" y1="78" x2="188" y2="78" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<rect x="190" y="50" width="130" height="56" rx="6" fill="var(--fb)" stroke="var(--blue)" stroke-width="1.3"/><text class="h" x="255" y="68" text-anchor="middle" dominant-baseline="central">Quarantined reader</text><text class="s" x="255" y="88" text-anchor="middle" dominant-baseline="central">Model · no tools</text>
+<line x1="320" y1="78" x2="348" y2="78" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<rect x="350" y="44" width="110" height="68" rx="6" fill="var(--fn)" stroke="var(--axis)" stroke-width="1.3"/><text class="h" x="405" y="62" text-anchor="middle" dominant-baseline="central">Schema check</text><text class="s" x="405" y="80" text-anchor="middle" dominant-baseline="central">Orchestrator</text><text class="s" x="405" y="96" text-anchor="middle" dominant-baseline="central">Structured fields only</text>
+<line x1="460" y1="78" x2="488" y2="78" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#ar)"/>
+<rect x="490" y="50" width="150" height="56" rx="6" fill="var(--fg)" stroke="var(--green)" stroke-width="1.3"/><text class="h" x="565" y="68" text-anchor="middle" dominant-baseline="central">Privileged actor</text><text class="s" x="565" y="88" text-anchor="middle" dominant-baseline="central">Model · tools · no raw text</text>
+<line x1="405" y1="20" x2="405" y2="40" stroke="var(--red)" stroke-width="2" stroke-dasharray="4 3"/>
+<line x1="405" y1="116" x2="405" y2="150" stroke="var(--red)" stroke-width="2" stroke-dasharray="4 3"/>
+<text class="s" x="40" y="140" dominant-baseline="central">Reads untrusted text, cannot act</text>
+<text class="s" x="640" y="140" text-anchor="end" dominant-baseline="central">Can act, never reads untrusted text</text>
+<text class="s" x="340" y="172" text-anchor="middle" dominant-baseline="central">Red barrier: only validated structured data crosses. Cost: two model calls per step and a narrower interface.</text>
+</svg>
+<figcaption><b>Figure 6.</b> The dual-model pattern (also called dual LLM, or CaMeL in the research literature). It is the one control that addresses indirect prompt injection structurally rather than probabilistically.</figcaption>
+</figure>
+
+<p>The closing point is about adoption, not invention. Nearly everything in the two tables is conventional security engineering applied to a new component: authenticate, scope, log, cap, verify. A single operator can apply most of it in an afternoon: per-use-case API keys with hard credit limits, headless jobs restricted to read-only, dependency pinning, mandatory access control left enforcing. The controls are cheap and known. What is missing in 2026 is the expectation that they ship by default.</p>
+
+<h2 id="resolve" class="s7">6. How a model reads one token, and where backpropagation fits</h2>
 <p>A common mental model is that a language model "reads" a character such as <span class="term">A</span>, tries several interpretations, and backtracks when one fails. The real mechanism is different in two ways. First, the model never sees a shape: the tokenizer hands it an integer ID, and the work is deciding what that ID means <em>here</em> (the article "a", the letter's name, a grade, a blood type, a musical note, a variable). Second, within a single forward pass nothing backtracks. Each layer rewrites the token's vector, so an early, generic reading is overwritten by a context-specific one. Interpretability researchers call reading those intermediate states out the <span class="term">logit lens</span>; the process itself is <span class="term">iterative refinement in the residual stream</span>.</p>
 
 <figure>
@@ -366,7 +479,7 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
 </svg>
 <div class="bars" id="bars"></div>
 <div class="lnote" id="lnote"></div>
-<figcaption><b>Figure 5.</b> Per-layer resolution of one token. The web edition is interactive: drag the layer slider. The PDF edition shows layer 3, where the reading flips from "letter" to "grade". Values are illustrative, not measured from a real model.</figcaption>
+<figcaption><b>Figure 7.</b> Per-layer resolution of one token. The web edition is interactive: drag the layer slider. The PDF edition shows layer 3, where the reading flips from "letter" to "grade". Values are illustrative, not measured from a real model.</figcaption>
 </figure>
 
 <p>Two things to notice. The "article" reading at layer 0 was never wrong: it was the correct prior with no context. And the flip at layer 3 is not a decision the model could revisit; it is arithmetic. Attention added the "exam" vector into the "A" position, and the sum now points in the "grade" direction.</p>
@@ -410,7 +523,7 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
 <text class="s" x="522" y="151" dominant-baseline="central">4</text><rect x="540" y="143" width="100" height="16" rx="3" fill="var(--grid)"/><rect x="540" y="143" width="2" height="16" rx="3" fill="var(--pt-blue)"/>
 <text class="s" x="580" y="178" text-anchor="middle">Crossbar kills Λ, apex kills H</text>
 </svg>
-<figcaption><b>Figure 6.</b> Spatial hierarchy in a vision encoder. Λ and H are not tried and abandoned; their evidence is simply outweighed in the same forward sum.</figcaption>
+<figcaption><b>Figure 8.</b> Spatial hierarchy in a vision encoder. Λ and H are not tried and abandoned; their evidence is simply outweighed in the same forward sum.</figcaption>
 </figure>
 
 <h3>The correct terms</h3>
@@ -427,7 +540,7 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
 </table>
 </div>
 
-<p>So the process that resembles backtracking through the layers is <span class="term">backpropagation</span>, and it happens only during training. After a wrong prediction, the backward pass computes how much each weight contributed to the error, layer by layer from the output back to the input, and gradient descent nudges each one. It is how the stroke detectors in Figure 6 were learned. Once the weights are frozen for deployment it never runs again.</p>
+<p>So the process that resembles backtracking through the layers is <span class="term">backpropagation</span>, and it happens only during training. After a wrong prediction, the backward pass computes how much each weight contributed to the error, layer by layer from the output back to the input, and gradient descent nudges each one. It is how the stroke detectors in Figure 8 were learned. Once the weights are frozen for deployment it never runs again.</p>
 
 <figure>
 <svg viewBox="0 0 680 232" role="img" aria-labelledby="f7t f7d">
@@ -446,7 +559,7 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
 <text class="s" x="340" y="186" text-anchor="middle" dominant-baseline="central">Cost: the backward side is about 2× the forward side, so a training token costs ≈ 3× an inference token,</text>
 <text class="s" x="340" y="202" text-anchor="middle" dominant-baseline="central">and needs full-precision weights plus optimizer state in memory. Inference can run quantized on frozen weights.</text>
 </svg>
-<figcaption><b>Figure 7.</b> Backpropagation is the training-time loop. Its roughly 3× per-token cost and memory footprint are the mechanical root of the capex/opex split in Figure 1.</figcaption>
+<figcaption><b>Figure 9.</b> Backpropagation is the training-time loop. Its roughly 3× per-token cost and memory footprint are the mechanical root of the capex/opex split in Figure 1.</figcaption>
 </figure>
 
 <h2 id="provenance" class="s5">7. Provenance and confidence</h2>
@@ -457,7 +570,10 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
   <li><span class="tag md">MED</span>The stack table's "binding constraint" column is the author's synthesis.</li>
   <li><span class="tag hi">HIGH</span>Section 6 mechanism: one-directional forward pass, residual-stream refinement, logit lens as a read-out, and the placement of backpropagation, self-correction and search. Standard usage in the ML and interpretability literature.</li>
   <li><span class="tag md">MED</span>The ≈3× training-to-inference cost per token is the standard rule of thumb (forward ≈ 2·N·D FLOP, full step ≈ 6·N·D), not a measured figure for any named model.</li>
-  <li><span class="tag lo">LOW</span>The per-layer percentages and attention weights in Figure 5 and the hypothesis bars in Figure 6 are illustrative constructions, not measurements.</li>
+  <li><span class="tag lo">LOW</span>The per-layer percentages and attention weights in Figure 7 and the hypothesis bars in Figure 8 are illustrative constructions, not measurements.</li>
+  <li><span class="tag hi">HIGH</span>Section 5 threat classes and controls follow the OWASP Top 10 for LLM and Agentic Applications, MITRE ATLAS and NIST AI RMF categories. Prompt injection's unsolved status is OWASP's own characterization.</li>
+  <li><span class="tag md">MED</span>Section 5 status badges (Partial / Rare / Unsolved) are the author's assessment of typical 2026 production deployments, inferred from the incident record; they are not survey data. Counts of exposed MCP servers, CVEs and downloads are as reported by security vendors and researchers with a commercial interest in the topic.</li>
+  <li><span class="tag lo">LOW</span>The "over 200,000 potentially compromisable MCP servers" figure is an extrapolation by its source, not a scan.</li>
   <li><span class="tag lo">LOW</span>The 2025–26 band of 1e26 to 1e27 FLOP comes from a single secondary consultancy write-up citing Epoch, not from lab disclosure.</li>
 </ul>
 
@@ -466,11 +582,18 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
   <li><a href="https://epoch.ai/trends">Epoch AI — Trends in Artificial Intelligence</a> (compute growth rate, doubling time, cost and power growth)</li>
   <li><a href="https://epoch.ai/publications/training-compute-of-frontier-ai-models-grows-by-4-5x-per-year">Epoch AI — Training compute of frontier AI models grows by 4–5× per year</a> (GPT-3, GPT-4, Gemini Ultra estimates)</li>
   <li><a href="https://epoch.ai/data/ai-models">Epoch AI — Data on AI Models</a> (notable models dataset)</li>
+  <li><a href="https://www.helpnetsecurity.com/2026/06/11/owasp-prompt-injection-ai-security-failures/">Help Net Security — Prompt injection still drives most agentic AI security failures in production (OWASP 2026 report coverage)</a></li>
+  <li><a href="https://the-agent-report.com/2026/07/mcp-security-landscape-2026-vulnerabilities-mitigations/">The Agent Report — MCP Security in Q3 2026: CVEs, exposed servers, mitigations</a></li>
+  <li><a href="https://labs.cloudsecurityalliance.org/research/csa-research-note-mcp-security-crisis-20260504-csa-styled/">Cloud Security Alliance — MCP Security Crisis: systemic design flaws in AI agent infrastructure</a></li>
+  <li><a href="https://www.microsoft.com/en-us/security/blog/2026/05/07/prompts-become-shells-rce-vulnerabilities-ai-agent-frameworks/">Microsoft Security Blog — When prompts become shells: RCE vulnerabilities in AI agent frameworks</a></li>
+  <li><a href="https://www.infosecurity-magazine.com/news/infosec-europe-prompt-injection/">Infosecurity Magazine — Prompt injection remains unsolved, OWASP researcher warns</a></li>
+  <li><a href="https://thehackernews.com/2026/04/anthropic-mcp-design-vulnerability.html">The Hacker News — MCP design vulnerability enables RCE</a></li>
+  <li><a href="https://genai.owasp.org/">OWASP GenAI Security Project — Top 10 for LLM and Agentic Applications</a> · <a href="https://atlas.mitre.org/">MITRE ATLAS</a> · <a href="https://www.nist.gov/itl/ai-risk-management-framework">NIST AI RMF</a></li>
   <li><a href="https://deluair.com/consultancy/insights/frontier-ai-training-cost-2026">Deluair Consultancy — Frontier AI training cost trajectory 2026</a> (secondary source for the 2025–26 band)</li>
 </ul>
 
 <footer>
-  How AI Is Built and Implemented · REV 1.1 · 19 September 2026 · Vendor-reported and third-party figures are kept distinct throughout.
+  How AI Is Built and Implemented · REV 1.2 · 19 September 2026 · Vendor-reported and third-party figures are kept distinct throughout.
 </footer>
 
 </div>
