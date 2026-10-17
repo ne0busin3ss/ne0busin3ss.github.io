@@ -208,7 +208,7 @@
         <li><strong>Never write to an open browser.</strong> A running browser overwrites its bookmark file when it closes, so the script waits until it’s closed.</li>
         <li><strong>Back up first, every time.</strong> The newest 10 copies of each browser’s bookmarks are kept.</li>
         <li><strong>Preview before acting.</strong> <code>--dry-run</code> shows every change without touching anything.</li>
-        <li><strong>Nothing to install.</strong> Plain Python 3, so it runs on any Linux, macOS or Windows machine.</li>
+        <li><strong>Nothing to install.</strong> Plain Python 3, nothing to download. It’s confirmed on Linux. The code also covers macOS and Windows, but those haven’t been tested yet.</li>
       </ul>
       <p>Chrome, Chromium and Edge store bookmarks in the same JSON format, so those are straightforward. Firefox is the hard one: its bookmarks live in a SQLite database alongside your browsing history, with internal hash values and reference counts that Firefox expects to stay consistent. The script writes Firefox in a single database transaction, reuses existing history entries, and records deletions so Firefox Sync passes them on to other devices.</p>
     </div>
@@ -335,6 +335,7 @@ return tuple(tree[r].signature()[2] for r in roots)</code></pre>
 cd Python/Bookmark_Sync
 python3 bookmark_sync.py --list
 python3 bookmark_sync.py --dry-run</code></pre>
+    <p><strong>Tested on Linux only.</strong> It runs daily on my Linux desktop, and the background service uses Linux’s <code>systemd</code>. The macOS and Windows support is written but hasn’t been tried on a real machine yet.</p>
     <p>It’s a mirror, so anything that exists only in the other browsers will be removed. It’s saved to an importable file first, but read the preview before your first real sync.</p>
   </section>
 
