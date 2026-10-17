@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chrome leads, two browsers follow</title>
-<meta name="description" content="How Claude and I built a one-way bookmark mirror from Chrome to Chromium and Firefox in one evening, and what my real bookmarks taught us along the way.">
+<title>Chrome leads, three browsers follow</title>
+<meta name="description" content="How Claude and I built a one-way bookmark mirror from Chrome to Chromium, Edge and Firefox in one evening, and what my real bookmarks taught us along the way.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -209,7 +209,7 @@
   <div class="masthead"><button type="button" class="theme-toggle" id="themeToggle" aria-pressed="false">Dark mode</button></div>
 
   <header>
-    <h1>Chrome leads, two browsers follow</h1>
+    <h1>Chrome leads, three browsers follow</h1>
     <p class="dek">How Claude and I built a bookmark mirror for my Linux desktop in one evening, and what my real bookmarks taught us that the tests couldn’t.</p>
     <p class="byline">Dave Raymond, October 2026</p>
   </header>
@@ -217,34 +217,42 @@
   <figure class="hero">
     <svg class="hero-wide" viewBox="0 0 720 300" role="img" aria-labelledby="heroTitle heroDesc">
       <title id="heroTitle">A one-way bookmark mirror</title>
-      <desc id="heroDesc">Chrome is the master copy at the top. Chromium and Firefox hang below it like bookmark ribbons, each receiving Chrome's bookmarks. Changes flow down only.</desc>
+      <desc id="heroDesc">Chrome is the master copy at the top. Chromium, Edge and Firefox hang below it like bookmark ribbons, each receiving Chrome's bookmarks. Changes flow down only.</desc>
       <rect x="10" y="20" width="700" height="62" rx="10" class="d-rail"/>
       <text x="360" y="58" text-anchor="middle" font-family="Archivo, Helvetica, Arial, sans-serif" font-size="24" font-weight="700" class="d-rail-text">Chrome, the master copy (read only)</text>
       <g font-family="Archivo, Helvetica, Arial, sans-serif" text-anchor="middle">
-        <path d="M150 82 H330 V262 L240 232 L150 262 Z" class="d-rib" stroke-width="2"/>
-        <text x="240" y="136" font-size="24" font-weight="700" class="d-title">Chromium</text>
-        <text x="240" y="166" font-size="17" class="d-sub">Bookmarks file</text>
-        <text x="240" y="190" font-size="17" class="d-sub">(JSON)</text>
+        <path d="M70 82 H230 V262 L150 232 L70 262 Z" class="d-rib" stroke-width="2"/>
+        <text x="150" y="136" font-size="24" font-weight="700" class="d-title">Chromium</text>
+        <text x="150" y="166" font-size="17" class="d-sub">Bookmarks file</text>
+        <text x="150" y="190" font-size="17" class="d-sub">(JSON)</text>
 
-        <path d="M390 82 H570 V262 L480 232 L390 262 Z" class="d-rib" stroke-width="2"/>
-        <text x="480" y="136" font-size="24" font-weight="700" class="d-title">Firefox</text>
-        <text x="480" y="166" font-size="17" class="d-sub">places.sqlite</text>
-        <text x="480" y="190" font-size="17" class="d-sub">(database)</text>
+        <path d="M280 82 H440 V262 L360 232 L280 262 Z" class="d-rib" stroke-width="2"/>
+        <text x="360" y="136" font-size="24" font-weight="700" class="d-title">Edge</text>
+        <text x="360" y="166" font-size="17" class="d-sub">Bookmarks file</text>
+        <text x="360" y="190" font-size="17" class="d-sub">(JSON)</text>
+
+        <path d="M490 82 H650 V262 L570 232 L490 262 Z" class="d-rib" stroke-width="2"/>
+        <text x="570" y="136" font-size="24" font-weight="700" class="d-title">Firefox</text>
+        <text x="570" y="166" font-size="17" class="d-sub">places.sqlite</text>
+        <text x="570" y="190" font-size="17" class="d-sub">(database)</text>
       </g>
     </svg>
     <svg class="hero-narrow" viewBox="0 0 360 270" role="img" aria-labelledby="heroTitle2 heroDesc2">
       <title id="heroTitle2">A one-way bookmark mirror</title>
-      <desc id="heroDesc2">Chrome is the master copy at the top. Chromium and Firefox hang below it like bookmark ribbons, each receiving Chrome's bookmarks.</desc>
+      <desc id="heroDesc2">Chrome is the master copy at the top. Chromium, Edge and Firefox hang below it like bookmark ribbons, each receiving Chrome's bookmarks.</desc>
       <rect x="2" y="10" width="356" height="52" rx="9" class="d-rail"/>
       <text x="180" y="35" text-anchor="middle" font-family="Archivo, Helvetica, Arial, sans-serif" font-size="19" font-weight="700" class="d-rail-text">Chrome, the master copy</text>
       <text x="180" y="53" text-anchor="middle" font-family="Archivo, Helvetica, Arial, sans-serif" font-size="13" class="d-rail-sub">read only</text>
       <g font-family="Archivo, Helvetica, Arial, sans-serif" text-anchor="middle">
-        <path d="M35 62 H165 V250 L100 222 L35 250 Z" class="d-rib" stroke-width="2"/>
-        <text x="100" y="112" font-size="17" font-weight="700" class="d-title">Chromium</text>
-        <text x="100" y="140" font-size="14" class="d-sub">JSON file</text>
-        <path d="M195 62 H325 V250 L260 222 L195 250 Z" class="d-rib" stroke-width="2"/>
-        <text x="260" y="112" font-size="17" font-weight="700" class="d-title">Firefox</text>
-        <text x="260" y="140" font-size="14" class="d-sub">database</text>
+        <path d="M14 62 H112 V250 L63 222 L14 250 Z" class="d-rib" stroke-width="2"/>
+        <text x="63" y="112" font-size="16" font-weight="700" class="d-title">Chromium</text>
+        <text x="63" y="140" font-size="14" class="d-sub">JSON file</text>
+        <path d="M131 62 H229 V250 L180 222 L131 250 Z" class="d-rib" stroke-width="2"/>
+        <text x="180" y="112" font-size="16" font-weight="700" class="d-title">Edge</text>
+        <text x="180" y="140" font-size="14" class="d-sub">JSON file</text>
+        <path d="M248 62 H346 V250 L297 222 L248 250 Z" class="d-rib" stroke-width="2"/>
+        <text x="297" y="112" font-size="16" font-weight="700" class="d-title">Firefox</text>
+        <text x="297" y="140" font-size="14" class="d-sub">database</text>
       </g>
     </svg>
     <figcaption>Changes flow one way, from Chrome down. Each browser is written only while it’s closed, and only when it differs from Chrome.</figcaption>
@@ -252,16 +260,16 @@
 
   <section class="measure">
     <h2>The problem</h2>
-    <p>I keep three browsers on my Linux desktop: Chrome, which holds my current bookmarks, plus Chromium and Firefox. I use more than one for testing, and as a fallback when a browser update occasionally breaks a site I depend on. Each browser has its own bookmark sync, but each only syncs with itself. Google syncs Chrome, Mozilla syncs Firefox, and they don’t talk to each other.</p>
-    <p>So the bookmarks drifted. A site saved in Chrome never reached Firefox. Until now, I exported my Chrome bookmarks to a file and imported it into the others by hand. With more than 400 bookmarks in about 80 folders, keeping up that way wasn’t realistic.</p>
-    <p>What I asked Claude for was simple: <strong>keep Chrome, Chromium and Firefox in sync, with Chrome as the primary copy.</strong> Microsoft Edge joined the list later that evening. I’ve since dropped Edge as more trouble than it was worth, but it taught us a lot along the way, as the timeline shows.</p>
+    <p>I keep four browsers on my Linux desktop: Chrome, which holds my current bookmarks, plus Chromium, Microsoft Edge and Firefox. I use more than one for testing, and as a fallback when a browser update occasionally breaks a site I depend on. Each has its own bookmark sync, but each only syncs with itself. Google syncs Chrome, Mozilla syncs Firefox, Microsoft syncs Edge, and none of them talk to each other.</p>
+    <p>So the bookmarks drifted. A site saved in Chrome never reached Firefox, and Edge still had an older folder layout than Chrome. Until now, I exported my Chrome bookmarks to a file and imported it into the others by hand. With more than 400 bookmarks in about 80 folders, keeping up that way wasn’t realistic.</p>
+    <p>What I asked Claude for was simple: <strong>keep Chrome, Chromium and Firefox in sync, with Chrome as the primary copy.</strong> Edge joined the list later that evening.</p>
   </section>
 
   <dl class="numbers" aria-label="The project by the numbers">
     <div><dt>2 h 20 min</dt><dd>from first request (7:42 pm) to final release (10:01 pm)</dd></div>
     <div><dt>1,241</dt><dd>lines of Python, using only the standard library</dd></div>
     <div><dt>8</dt><dd>releases, from 1.0.0 to 1.3.3</dd></div>
-    <div><dt>430</dt><dd>bookmarks in 81 folders, now identical in all three browsers</dd></div>
+    <div><dt>430</dt><dd>bookmarks in 81 folders, now identical in four browsers</dd></div>
     <div><dt>23</dt><dd>Edge-only bookmarks recovered from a backup</dd></div>
     <div><dt>0</dt><dd>packages to install</dd></div>
   </dl>
@@ -277,7 +285,7 @@
         <li><strong>Preview before acting.</strong> <code>--dry-run</code> shows every change without touching anything.</li>
         <li><strong>Nothing to install.</strong> Plain Python 3, nothing to download. It’s confirmed on Linux. The code also covers macOS and Windows, but those haven’t been tested yet.</li>
       </ul>
-      <p>Chrome and Chromium store bookmarks in the same JSON format, so Chromium is straightforward. (So do Edge and Brave, which the script also supports.) Firefox is the hard one: its bookmarks live in a SQLite database alongside your browsing history, with internal hash values and reference counts that Firefox expects to stay consistent. The script writes Firefox in a single database transaction, reuses existing history entries, and records deletions so Firefox Sync passes them on to other devices.</p>
+      <p>Chrome, Chromium and Edge store bookmarks in the same JSON format, so those are straightforward. Firefox is the hard one: its bookmarks live in a SQLite database alongside your browsing history, with internal hash values and reference counts that Firefox expects to stay consistent. The script writes Firefox in a single database transaction, reuses existing history entries, and records deletions so Firefox Sync passes them on to other devices.</p>
     </div>
 
     <h3>What happens on each sync</h3>
@@ -286,7 +294,7 @@
       <li><b>Compare with each browser</b>Titles, links, folders and order. If they already match, nothing is written.</li>
       <li><b>Wait if the browser is open</b>It’s noted once in the log and updated within a minute of closing.</li>
       <li><b>Back up, and save anything about to disappear</b>Bookmarks only that browser had are saved to a file Chrome can import.</li>
-      <li><b>Write the new bookmarks</b>An atomic file swap for Chromium, one database transaction for Firefox.</li>
+      <li><b>Write the new bookmarks</b>An atomic file swap for Chromium and Edge, one database transaction for Firefox.</li>
     </ol>
   </section>
 
@@ -354,7 +362,6 @@ return tuple(tree[r].signature()[2] for r in roots)</code></pre>
     <h2>Running it day to day</h2>
     <div class="measure">
       <p>The script runs as a Linux <code>systemd</code> user service. It starts when I log in, checks every 60 seconds, and logs what it does. I don’t think about it anymore: I bookmark in Chrome, and the other browsers have it the next time I open them.</p>
-      <p>Today it syncs Chromium and Firefox. When I retired Edge, nothing in the code had to change: the list of browsers to keep in step is one setting in the service.</p>
       <p>Two practical lessons came out of setup. When I moved my code folder into <code>~/Development</code>, the service quietly failed, because it still pointed at the old path. The log said so plainly, and one edit to the service file fixed it. And pushing my own changes to GitHub needed a sign-in, which the GitHub command-line tool (<code>gh auth login</code>) handled through the browser.</p>
     </div>
   </section>
@@ -376,7 +383,7 @@ return tuple(tree[r].signature()[2] for r in roots)</code></pre>
       <div>
         <h3>Me</h3>
         <ul>
-          <li>Set the goal and the scope (Edge in, later out; Safari never)</li>
+          <li>Set the goal and the scope (Edge in, Safari out)</li>
           <li>Ran every step on my own machine and real bookmarks</li>
           <li>Decided which rescued bookmarks to keep</li>
           <li>Set up the background service</li>
