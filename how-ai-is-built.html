@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>How AI Is Built and Implemented — REV 1.2</title>
+<title>How AI Is Built and Implemented — REV 1.3</title>
 <meta name="description" content="High-level overview of how modern AI systems are built (data, pretraining, post-training, evaluation) and implemented (serving, orchestration, applications), with diagrams, a training-compute chart, and confidence-tagged provenance.">
 <style>
 :root{
@@ -111,6 +111,7 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
   h2,h3{break-after:avoid}
   .tablewrap{overflow:visible}
   a{text-decoration:none}
+  footer{margin-top:24px;break-before:avoid}
 }
 </style>
 <script>try{var t=localStorage.getItem('ai-doc-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
@@ -130,8 +131,8 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
   <h1>How AI Is Built and Implemented</h1>
   <p class="sub">The lifecycle, the mechanism inside the model, the scale economics, and the software layer that turns a model into a product.</p>
   <div class="meta">
-    <span class="pill rev">REV 1.2</span>
-    <span class="pill">19 September 2026</span>
+    <span class="pill rev">REV 1.3</span>
+    <span class="pill">20 October 2026</span>
     <span class="pill">Confidence-tagged · provenance at end</span>
     <a class="dl" href="how-ai-is-built-light.pdf" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4M4 19h16"/></svg>Download PDF · light</a>
     <a class="dl alt" href="how-ai-is-built-dark.pdf" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4M4 19h16"/></svg>Download PDF · dark</a>
@@ -229,17 +230,17 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
 </ul>
 
 <h2 id="scale" class="s3">3. Scale: why building is a capital project</h2>
-<p>Capability has tracked training compute closely, so labs have scaled it relentlessly. Epoch AI's trend dashboard puts frontier language-model training compute at about 5× per year since 2020, a doubling roughly every 5.2 months, with training costs rising about 3.5× per year and power requirements doubling annually. <span class="tag hi">HIGH</span></p>
+<p>Capability has tracked training compute closely, so labs have scaled it relentlessly. Epoch AI's trend dashboard puts frontier language-model training compute at about 5× per year since 2020, a doubling roughly every 5.2 months, with training costs rising about 3.5× per year. A separate Epoch analysis finds the power drawn by frontier training runs roughly doubling each year (2.1× per year since 2010). <span class="tag hi">HIGH</span></p>
 
 <figure>
 <div class="legend">
   <span><svg width="14" height="14" viewBox="0 0 14 14" style="width:14px;display:inline-block"><circle cx="7" cy="7" r="6" fill="var(--pt-blue)"/></svg>Developer-reported (circle)</span>
   <span><svg width="14" height="14" viewBox="0 0 14 14" style="width:14px;display:inline-block"><polygon points="7,1 1,13 13,13" fill="var(--pt-amber)"/></svg>Third-party estimate (triangle)</span>
-  <span><svg width="18" height="12" viewBox="0 0 18 12" style="width:18px;display:inline-block"><rect x="1" y="1" width="16" height="10" fill="none" stroke="var(--purple)" stroke-width="1.5" stroke-dasharray="4 3"/></svg>2025–26 frontier band (secondary source)</span>
+  <span><svg width="12" height="14" viewBox="0 0 12 14" style="width:12px;display:inline-block"><g stroke="var(--pt-amber)" stroke-width="1.6"><line x1="6" y1="1" x2="6" y2="13"/><line x1="2" y1="1" x2="10" y2="1"/><line x1="2" y1="13" x2="10" y2="13"/></g></svg>Range of Epoch's estimate</span>
 </div>
 <svg viewBox="0 0 760 420" role="img" aria-labelledby="f3t f3d">
-<title id="f3t">Training compute of landmark AI models, 2012 to 2024, log scale</title>
-<desc id="f3d">AlexNet 2012 4.7e17 FLOP; Transformer 2017 7.4e18; BERT-Large 2018 2.9e20; GPT-3 2020 3.1e23; PaLM 2022 2.5e24; GPT-4 2023 2e25; Gemini Ultra 2023 5e25; Llama 3.1 405B 2024 3.8e25. A dashed band marks 1e26 to 1e27 FLOP for 2025 to 2026 frontier runs.</desc>
+<title id="f3t">Training compute of landmark AI models, 2012 to 2026, log scale</title>
+<desc id="f3d">AlexNet 2012 4.7e17 FLOP; Transformer 2017 7.4e18; BERT-Large 2018 2.9e20; GPT-3 2020 3.1e23; PaLM 2022 2.5e24; GPT-4 2023 2.1e25; Gemini Ultra 2023 5e25; Llama 3.1 405B 2024 3.8e25; Grok 3 2025 3.5e26; GPT-4.5 2025 3.8e26; Grok 4 2025 5e26; GPT-6 Astra 2026 9.4e26 with a range of about 5e26 to 2e27.</desc>
 <g stroke="var(--grid)" stroke-width="1">
 <line x1="80" y1="330" x2="730" y2="330"/><line x1="80" y1="300" x2="730" y2="300"/><line x1="80" y1="270" x2="730" y2="270"/><line x1="80" y1="240" x2="730" y2="240"/><line x1="80" y1="210" x2="730" y2="210"/><line x1="80" y1="180" x2="730" y2="180"/><line x1="80" y1="150" x2="730" y2="150"/><line x1="80" y1="120" x2="730" y2="120"/><line x1="80" y1="90" x2="730" y2="90"/><line x1="80" y1="60" x2="730" y2="60"/><line x1="80" y1="30" x2="730" y2="30"/>
 </g>
@@ -253,14 +254,17 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
 <text class="ax" x="405" y="408">Release year</text>
 </g>
 <text class="ax" x="80" y="16">Training compute (FLOP, log scale)</text>
-<rect x="608.1" y="60" width="81.3" height="30" fill="none" stroke="var(--purple)" stroke-width="1.6" stroke-dasharray="5 4"><title>2025–26 frontier training runs: roughly 1e26 to 1e27 FLOP (LOW confidence, secondary source)</title></rect>
-<text class="lb" x="689" y="50" text-anchor="end">2025–26 frontier runs (LOW)</text>
+<g stroke="var(--pt-amber)" stroke-width="1.6"><line x1="676.0" y1="51.0" x2="676.0" y2="69.0"/><line x1="671.0" y1="51.0" x2="681.0" y2="51.0"/><line x1="671.0" y1="69.0" x2="681.0" y2="69.0"/><title>Epoch AI range for GPT-6 Astra: about 5e26 to 2e27 FLOP</title></g>
 <g fill="var(--pt-amber)" stroke="var(--bg)" stroke-width="2">
 <polygon points="110.5,331.8 103.5,344.8 117.5,344.8"><title>AlexNet (2012): ~4.7e17 FLOP — third-party estimate</title></polygon>
 <polygon points="301.4,295.9 294.4,308.9 308.4,308.9"><title>Transformer, big (2017): ~7.4e18 FLOP — third-party estimate</title></polygon>
 <polygon points="355.4,248.4 348.4,261.4 362.4,261.4"><title>BERT-Large (2018): ~2.9e20 FLOP — third-party estimate</title></polygon>
-<polygon points="535,103 528,116 542,116"><title>GPT-4 (2023): ~2e25 FLOP — Epoch AI estimate</title></polygon>
-<polygon points="564.7,91 557.7,104 571.7,104"><title>Gemini Ultra (2023): ~5e25 FLOP — Epoch AI estimate</title></polygon>
+<polygon points="535,103 528,116 542,116"><title>GPT-4 (2023): ~2.1e25 FLOP — Epoch AI estimate</title></polygon>
+<polygon points="564.7,91 557.7,104 571.7,104"><title>Gemini Ultra (2023): ~5e25 FLOP — Epoch AI estimate (speculative)</title></polygon>
+<polygon points="609.4,65.0 602.4,78.0 616.4,78.0"><title>Grok 3 (2025): ~3.5e26 FLOP — Epoch AI estimate (likely)</title></polygon>
+<polygon points="618.5,63.9 611.5,76.9 625.5,76.9"><title>GPT-4.5 (2025): ~3.8e26 FLOP — Epoch AI estimate (likely)</title></polygon>
+<polygon points="629.2,60.3 622.2,73.3 636.2,73.3"><title>Grok 4 (2025): ~5.0e26 FLOP — Epoch AI estimate (speculative)</title></polygon>
+<polygon points="676.0,52.1 669.0,65.1 683.0,65.1"><title>GPT-6 Astra (2026): ~9.4e26 FLOP — Epoch AI estimate (likely; range about 5e26 to 2e27)</title></polygon>
 </g>
 <g fill="var(--pt-blue)" stroke="var(--bg)" stroke-width="2">
 <circle cx="421.3" cy="165.1" r="7"><title>GPT-3 175B (2020): 3.14e23 FLOP — developer-reported</title></circle>
@@ -275,11 +279,13 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
 <text class="lb" x="523" y="117" text-anchor="end">GPT-4</text>
 <text class="lb" x="556" y="84" text-anchor="end">Gemini Ultra</text>
 <text class="lb" x="602" y="122">Llama 3.1 405B</text>
+<text class="lb" x="606" y="52" text-anchor="end">Grok 3 · GPT-4.5 · Grok 4</text>
+<text class="lb" x="668.0" y="40" text-anchor="end">GPT-6 Astra</text>
 </svg>
-<figcaption><b>Figure 3.</b> About eight orders of magnitude in twelve years. Marker shape encodes provenance: circles are developer-reported, triangles are third-party estimates. Hover a marker for its value. The 2025–26 band is drawn as a range, not as points, because it is not lab-disclosed.</figcaption>
+<figcaption><b>Figure 3.</b> About nine orders of magnitude in fourteen years. Marker shape encodes provenance: circles are developer-reported, triangles are third-party estimates. Hover a marker for its value. No lab has disclosed the compute of a 2025–26 frontier run; those four points are Epoch AI's estimates, and the bar on GPT-6 Astra shows Epoch's range.</figcaption>
 </figure>
 
-<p>Epoch's own estimates put GPT-4 at about 2e25 FLOP and Gemini Ultra at about 5e25, against GPT-3's roughly 3e23 in 2020. <span class="tag hi">HIGH</span> A secondary analysis places 2026 frontier runs in the 1e26 to 1e27 window. <span class="tag lo">LOW</span></p>
+<p>Epoch's own estimates put GPT-4 at about 2e25 FLOP and Gemini Ultra at about 5e25, against GPT-3's roughly 3e23 in 2020. <span class="tag hi">HIGH</span> The largest runs it has estimated since then sit between about 3.5e26 (Grok 3, February 2025) and 9.4e26 (GPT-6 Astra, September 2026), with the Astra figure uncertain to within roughly a factor of two either way. Grok 3 was the first model in Epoch's dataset estimated above 1e26. <span class="tag md">MED</span></p>
 
 <h3>The physical stack, bottom to top</h3>
 <div class="tablewrap">
@@ -347,26 +353,26 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
 <thead><tr><th>Mode</th><th>Who holds the weights</th><th>Cost shape</th><th>Trade-off</th><th>Routing lane</th></tr></thead>
 <tbody>
 <tr><td>Local open weights</td><td>You (llama.cpp, Ollama, quantized to fit consumer VRAM)</td><td>Hardware capex, near-zero marginal cost</td><td>Private and free per token; capability capped by memory</td><td>Lane 1</td></tr>
-<tr><td>Hosted open weights</td><td>A cloud host behind a router</td><td>Low per-token opex</td><td>Cheap and capable; endpoint reliability varies</td><td>Lane 2</td></tr>
-<tr><td>Closed frontier API</td><td>The lab only</td><td>Highest per-token opex</td><td>Top capability; no weight access</td><td>Lane 3</td></tr>
+<tr><td>Hosted open weights</td><td>A cloud host behind a router</td><td>Low per-token opex</td><td>Cheap and capable; endpoint reliability varies</td><td>Lane 1</td></tr>
+<tr><td>Closed proprietary API</td><td>The lab only</td><td>Mid to highest per-token opex, by tier</td><td>Top capability; no weight access</td><td>Lane 2 (mid tier) or Lane 3 (flagship)</td></tr>
 </tbody>
 </table>
 </div>
-<p>The routing decision across these modes is an intelligence-per-dollar question: cost per unit of completed task, including endpoint reliability, rather than headline capability.</p>
+<p>The routing lanes are the three defined in the companion paper, <a href="frontier-premium-economics.html">Why Enterprises Pay the Frontier Premium</a>: Lane 1 is bounded, high-volume work on open weights; Lane 2 is general reasoning on a cost-tuned proprietary tier; Lane 3 is long-horizon, calibration-critical work on a frontier flagship. The routing decision across these modes is an intelligence-per-dollar question: cost per unit of completed task, including endpoint reliability, rather than headline capability.</p>
 
 
 <h2 id="security" class="s6">5. The security layer: prominent, specified, not yet deployed</h2>
-<p>Figures 1 and 4 have no security component, and that omission mirrors the field. As of September 2026 the controls for AI systems are well specified in OWASP's Top 10 for LLM and Agentic Applications, MITRE ATLAS and the NIST AI Risk Management Framework, yet the incident record shows them deployed unevenly, and one class of threat has no complete fix at any layer. This is now a prominent issue that needs to be addressed, not a footnote to the architecture. The evidence divides into three tiers, and each carries a different status.</p>
+<p>Figures 1 and 4 have no security component, and that omission mirrors the field. As of October 2026 the controls for AI systems are well specified in OWASP's Top 10 lists for LLM Applications (2026 edition) and for Agentic Applications, MITRE ATLAS and the NIST AI Risk Management Framework, yet the incident record shows them deployed unevenly, and one class of threat has no complete fix at any layer. This is now a prominent issue that needs to be addressed, not a footnote to the architecture. The evidence divides into three tiers, and each carries a different status.</p>
 
 <div class="evbox">
-  <p style="margin:0 0 4px"><span class="term">2026 evidence.</span> Figures are as reported by the cited source; most sources sell security products or research, so treat counts as indicative.</p>
+  <p style="margin:0 0 4px"><span class="term">2025–26 evidence.</span> Figures are as reported by the cited source; most sources sell security products or research, so treat counts as indicative.</p>
   <ul>
-    <li><span class="tag hi">HIGH</span>Prompt injection maps to six of the ten OWASP agentic categories and is described by OWASP's own researchers as unsolved. Root cause: the model receives system prompt, user text and retrieved content as one token stream with no channel that separates command from data.</li>
-    <li><span class="tag md">MED</span>MCP authentication is optional in the protocol; the July 2026 spec revision leaves permission models, rate limiting and response integrity to the ecosystem. About 7,000 MCP servers were found reachable on the public internet; 14 CVEs by Q3 2026, over 30 remote-code-execution issues sharing one root cause.</li>
-    <li><span class="tag hi">HIGH</span>Supply chain: a backdoored postmark-mcp package reached roughly 300 organizations; a LiteLLM PyPI backdoor was downloaded about 47,000 times in three hours.</li>
-    <li><span class="tag hi">HIGH</span>Insecure output handling: Microsoft's Semantic Kernel shipped two remote-code-execution flaws (CVE-2026-26030, CVE-2026-25592) where model-influenced strings reached an interpreter. Microsoft's remediation guidance is the textbook control: treat any model-influenced tool parameter as attacker-controlled input.</li>
-    <li><span class="tag md">MED</span>Governance: only 37% of organizations surveyed by OWASP contributors have policies to detect shadow AI deployments.</li>
-    <li><span class="tag lo">LOW</span>An estimate of over 200,000 MCP servers potentially compromisable through SDK flaws is an extrapolation, not a scan.</li>
+    <li><span class="tag hi">HIGH</span>Prompt injection maps to six of the ten OWASP agentic categories, and an OWASP contributor told Infosecurity Europe 2026 it is an unsolved architectural problem. Root cause: the model receives system prompt, user text and retrieved content as one token stream with no channel that separates command from data.</li>
+    <li><span class="tag md">MED</span>MCP authorization is optional in the protocol, including in the current specification (revision of 28 July 2026); analysts note that permission models, rate limiting and response integrity remain left to the ecosystem. OX Security traced over 30 responsible disclosures and more than ten high or critical CVEs to one root cause in the official SDKs' local (STDIO) transport, which passes commands to the operating system unsanitized, and counted more than 7,000 publicly reachable servers. The Agent Report tallied 14 MCP CVEs by July 2026, and in September CISA added an MCP authentication bypass in LiteLLM (CVE-2026-59822) to its catalog of vulnerabilities exploited in the wild.</li>
+    <li><span class="tag hi">HIGH</span>Supply chain: a backdoored postmark-mcp package that copied users' outgoing email to an attacker may have reached about 300 organizations (Koi Security, September 2025); backdoored LiteLLM releases on PyPI were downloaded nearly 47,000 times in about 46 minutes before quarantine (FutureSearch, March 2026).</li>
+    <li><span class="tag hi">HIGH</span>Insecure output handling: Microsoft's Semantic Kernel shipped two remote-code-execution flaws: in Python, a model-controlled filter string reached <code>eval()</code> (CVE-2026-26030); in .NET, a file-download function accidentally exposed as a tool let the model write files to the host (CVE-2026-25592). Microsoft's remediation guidance is the textbook control: treat any model-influenced tool parameter as attacker-controlled input.</li>
+    <li><span class="tag md">MED</span>Governance: only 37% of the breached organizations in IBM and Ponemon's 2025 Cost of a Data Breach study had policies to manage AI or detect shadow AI.</li>
+    <li><span class="tag lo">LOW</span>OX Security's estimate of up to 200,000 vulnerable MCP instances is an extrapolation, not a scan.</li>
   </ul>
 </div>
 
@@ -459,27 +465,27 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
 <text class="s" x="640" y="140" text-anchor="end" dominant-baseline="central">Can act, never reads untrusted text</text>
 <text class="s" x="340" y="172" text-anchor="middle" dominant-baseline="central">Red barrier: only validated structured data crosses. Cost: two model calls per step and a narrower interface.</text>
 </svg>
-<figcaption><b>Figure 6.</b> The dual-model pattern (also called dual LLM, or CaMeL in the research literature). It is the one control that addresses indirect prompt injection structurally rather than probabilistically.</figcaption>
+<figcaption><b>Figure 6.</b> The dual-model pattern (also called dual LLM; CaMeL, in the research literature, extends it with capability tracking on every value that crosses). It is the one control that addresses indirect prompt injection structurally rather than probabilistically.</figcaption>
 </figure>
 
 <p>The closing point is about adoption, not invention. Nearly everything in the two tables is conventional security engineering applied to a new component: authenticate, scope, log, cap, verify. A single operator can apply most of it in an afternoon: per-use-case API keys with hard credit limits, headless jobs restricted to read-only, dependency pinning, mandatory access control left enforcing. The controls are cheap and known. What is missing in 2026 is the expectation that they ship by default.</p>
 
 <h2 id="resolve" class="s7">6. How a model reads one token, and where backpropagation fits</h2>
-<p>A common mental model is that a language model "reads" a character such as <span class="term">A</span>, tries several interpretations, and backtracks when one fails. The real mechanism is different in two ways. First, the model never sees a shape: the tokenizer hands it an integer ID, and the work is deciding what that ID means <em>here</em> (the article "a", the letter's name, a grade, a blood type, a musical note, a variable). Second, within a single forward pass nothing backtracks. Each layer rewrites the token's vector, so an early, generic reading is overwritten by a context-specific one. Interpretability researchers call reading those intermediate states out the <span class="term">logit lens</span>; the process itself is <span class="term">iterative refinement in the residual stream</span>.</p>
+<p>A common mental model is that a language model "reads" a character such as <span class="term">A</span>, tries several interpretations, and backtracks when one fails. The real mechanism is different in two ways. First, the model never sees a shape: the tokenizer hands it an integer ID, and the work is deciding what that ID means <em>here</em> (the article "a", the letter's name, a grade, a blood type, a musical note, a variable). Second, within a single forward pass nothing backtracks, and nothing looks ahead: in a generative (decoder-only) model each position attends only to the tokens before it. Each layer rewrites the token's vector, so an early, generic reading is overwritten by a context-specific one. Interpretability researchers call reading those intermediate states out the <span class="term">logit lens</span>; the process itself is <span class="term">iterative refinement in the residual stream</span>.</p>
 
 <figure>
 <div class="ctl"><span>Layer</span><input type="range" id="ly" min="0" max="6" step="1" value="3" aria-label="Transformer layer"><b id="lyl">3 of 6</b></div>
 <svg viewBox="0 0 680 200" role="img" aria-labelledby="f5t f5d">
 <title id="f5t">Attention from the token A to its context, by layer</title>
-<desc id="f5d">Sentence: She got an A on the exam. Curved lines from the A position to other tokens grow thicker on got and exam as the layer index rises.</desc>
-<text class="s" x="40" y="24">Sentence: "She got an A on the exam." — the amber token is the one being resolved</text>
+<desc id="f5d">Sentence: On the exam she got an A. Curved lines run leftward from the A position to the earlier tokens and grow thicker on got and exam as the layer index rises. Causal attention means A cannot read any token after it.</desc>
+<text class="s" x="40" y="24">Sentence: "On the exam she got an A." — the amber token is the one being resolved</text>
 <g id="lines"></g>
 <g id="toks"></g>
-<text class="s" x="340" y="192" text-anchor="middle">Line thickness = how much the "A" position reads from each token at this layer</text>
+<text class="s" x="340" y="192" text-anchor="middle">Line thickness = how much the "A" position reads from each earlier token at this layer</text>
 </svg>
 <div class="bars" id="bars"></div>
 <div class="lnote" id="lnote"></div>
-<figcaption><b>Figure 7.</b> Per-layer resolution of one token. The web edition is interactive: drag the layer slider. The PDF edition shows layer 3, where the reading flips from "letter" to "grade". Values are illustrative, not measured from a real model.</figcaption>
+<figcaption><b>Figure 7.</b> Per-layer resolution of one token. Attention in a generative model is causal: a position can read only the tokens before it, so the word that settles the meaning ("exam") has to come earlier in the sentence. The web edition is interactive: drag the layer slider. The PDF edition shows layer 3, where the reading flips from "letter" to "grade". Values are illustrative, not measured from a real model.</figcaption>
 </figure>
 
 <p>Two things to notice. The "article" reading at layer 0 was never wrong: it was the correct prior with no context. And the flip at layer 3 is not a decision the model could revisit; it is arithmetic. Attention added the "exam" vector into the "A" position, and the sum now points in the "grade" direction.</p>
@@ -565,35 +571,49 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
 <h2 id="provenance" class="s5">7. Provenance and confidence</h2>
 <ul class="prov">
   <li><span class="tag hi">HIGH</span>Lifecycle structure, transformer loop, prefill/decode asymmetry, KV cache role, implementation patterns. Stable, widely documented engineering.</li>
-  <li><span class="tag hi">HIGH</span>The 5× per year compute trend and the GPT-3, GPT-4 and Gemini Ultra compute figures, checked against Epoch AI pages on 19 Sep 2026. The GPT-4 and Gemini Ultra figures are Epoch estimates, not lab disclosures.</li>
-  <li><span class="tag md">MED</span>The AlexNet, Transformer, BERT-Large, PaLM and Llama 3.1 405B chart points are from recall of the source papers and Epoch's dataset and were not re-pulled for this revision. PaLM and Llama are developer-reported values; the other three are third-party estimates.</li>
+  <li><span class="tag hi">HIGH</span>The 5× per year compute trend, 5.2-month doubling time and 3.5× per year cost trend, re-checked against Epoch AI's trends page on 20 Oct 2026; the power trend is from Epoch's separate power-usage analysis.</li>
+  <li><span class="tag hi">HIGH</span>All eight 2012–2024 chart points, re-checked on 20 Oct 2026 against Epoch's notable-models data (via Our World in Data's copy) and Epoch's frontier-models file. GPT-3, PaLM and Llama 3.1 405B are developer-reported values; the rest are third-party estimates, and Epoch rates its Gemini Ultra figure speculative.</li>
   <li><span class="tag md">MED</span>The stack table's "binding constraint" column is the author's synthesis.</li>
   <li><span class="tag hi">HIGH</span>Section 6 mechanism: one-directional forward pass, residual-stream refinement, logit lens as a read-out, and the placement of backpropagation, self-correction and search. Standard usage in the ML and interpretability literature.</li>
   <li><span class="tag md">MED</span>The ≈3× training-to-inference cost per token is the standard rule of thumb (forward ≈ 2·N·D FLOP, full step ≈ 6·N·D), not a measured figure for any named model.</li>
   <li><span class="tag lo">LOW</span>The per-layer percentages and attention weights in Figure 7 and the hypothesis bars in Figure 8 are illustrative constructions, not measurements.</li>
-  <li><span class="tag hi">HIGH</span>Section 5 threat classes and controls follow the OWASP Top 10 for LLM and Agentic Applications, MITRE ATLAS and NIST AI RMF categories. Prompt injection's unsolved status is OWASP's own characterization.</li>
+  <li><span class="tag hi">HIGH</span>Section 5 threat classes and controls follow the OWASP Top 10 for LLM and Agentic Applications, MITRE ATLAS and NIST AI RMF categories. Prompt injection's unsolved status is the characterization of an OWASP contributor, and OWASP's own Top 10 offers mitigations rather than a fix.</li>
   <li><span class="tag md">MED</span>Section 5 status badges (Partial / Rare / Unsolved) are the author's assessment of typical 2026 production deployments, inferred from the incident record; they are not survey data. Counts of exposed MCP servers, CVEs and downloads are as reported by security vendors and researchers with a commercial interest in the topic.</li>
-  <li><span class="tag lo">LOW</span>The "over 200,000 potentially compromisable MCP servers" figure is an extrapolation by its source, not a scan.</li>
-  <li><span class="tag lo">LOW</span>The 2025–26 band of 1e26 to 1e27 FLOP comes from a single secondary consultancy write-up citing Epoch, not from lab disclosure.</li>
+  <li><span class="tag lo">LOW</span>The "up to 200,000 vulnerable MCP instances" figure is an extrapolation by OX Security, not a scan.</li>
+  <li><span class="tag md">MED</span>The four 2025–26 chart points are Epoch AI estimates, not lab disclosures; Epoch rates Grok 3, GPT-4.5 and GPT-6 Astra likely and Grok 4 speculative.</li>
+</ul>
+
+<h3>Changes in REV 1.3 (20 October 2026)</h3>
+<ul>
+  <li><span class="term">Corrected Figure 7.</span> The example had the token "A" attending to "exam", a word after it. Generative models attend only to earlier tokens, so the sentence is reordered to "On the exam she got an A" and the text now says so.</li>
+  <li><span class="term">Figure 3 extended to 2026.</span> The unsourced 2025–26 band is replaced by Epoch AI's own estimates for Grok 3, GPT-4.5, Grok 4 and GPT-6 Astra, and all earlier points were re-checked against Epoch data.</li>
+  <li><span class="term">Routing lanes aligned.</span> The deployment-mode table now uses the same three lanes as the companion paper; hosted open weights had been placed in the mid-tier proprietary lane.</li>
+  <li><span class="term">Security evidence re-sourced.</span> Six attributions and figures were corrected against their primary sources (the 47,000 LiteLLM downloads took 46 minutes, not three hours; the 37% shadow-AI figure is IBM/Ponemon, not OWASP; the second Semantic Kernel flaw is a file write, not an interpreter), and the September 2026 CISA listing of an exploited MCP flaw was added.</li>
 </ul>
 
 <h3>Sources</h3>
 <ul>
   <li><a href="https://epoch.ai/trends">Epoch AI — Trends in Artificial Intelligence</a> (compute growth rate, doubling time, cost and power growth)</li>
   <li><a href="https://epoch.ai/publications/training-compute-of-frontier-ai-models-grows-by-4-5x-per-year">Epoch AI — Training compute of frontier AI models grows by 4–5× per year</a> (GPT-3, GPT-4, Gemini Ultra estimates)</li>
-  <li><a href="https://epoch.ai/data/ai-models">Epoch AI — Data on AI Models</a> (notable models dataset)</li>
+  <li><a href="https://epoch.ai/data/ai-models">Epoch AI — Data on AI Models</a> (notable and frontier models datasets, including the 2025–26 estimates)</li>
+  <li><a href="https://epoch.ai/data-insights/power-usage-trend">Epoch AI — Power usage of frontier training runs</a> (2.1× per year)</li>
   <li><a href="https://www.helpnetsecurity.com/2026/06/11/owasp-prompt-injection-ai-security-failures/">Help Net Security — Prompt injection still drives most agentic AI security failures in production (OWASP 2026 report coverage)</a></li>
   <li><a href="https://the-agent-report.com/2026/07/mcp-security-landscape-2026-vulnerabilities-mitigations/">The Agent Report — MCP Security in Q3 2026: CVEs, exposed servers, mitigations</a></li>
   <li><a href="https://labs.cloudsecurityalliance.org/research/csa-research-note-mcp-security-crisis-20260504-csa-styled/">Cloud Security Alliance — MCP Security Crisis: systemic design flaws in AI agent infrastructure</a></li>
   <li><a href="https://www.microsoft.com/en-us/security/blog/2026/05/07/prompts-become-shells-rce-vulnerabilities-ai-agent-frameworks/">Microsoft Security Blog — When prompts become shells: RCE vulnerabilities in AI agent frameworks</a></li>
   <li><a href="https://www.infosecurity-magazine.com/news/infosec-europe-prompt-injection/">Infosecurity Magazine — Prompt injection remains unsolved, OWASP researcher warns</a></li>
   <li><a href="https://thehackernews.com/2026/04/anthropic-mcp-design-vulnerability.html">The Hacker News — MCP design vulnerability enables RCE</a></li>
-  <li><a href="https://genai.owasp.org/">OWASP GenAI Security Project — Top 10 for LLM and Agentic Applications</a> · <a href="https://atlas.mitre.org/">MITRE ATLAS</a> · <a href="https://www.nist.gov/itl/ai-risk-management-framework">NIST AI RMF</a></li>
-  <li><a href="https://deluair.com/consultancy/insights/frontier-ai-training-cost-2026">Deluair Consultancy — Frontier AI training cost trajectory 2026</a> (secondary source for the 2025–26 band)</li>
+  <li><a href="https://www.ox.security/research-news/the-mother-of-all-ai-supply-chains-critical-systemic-vulnerability-at-the-core-of-the-mcp/">OX Security — Systemic vulnerability at the core of MCP</a> (STDIO root cause, 7,000+ servers, up to 200,000 instances)</li>
+  <li><a href="https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization">Model Context Protocol specification, revision 2026-07-28 — Authorization</a></li>
+  <li><a href="https://www.esecurityplanet.com/news/news-cisa-exploited-ai-flaws/">eSecurity Planet — CISA adds exploited AI flaws to KEV, including LiteLLM CVE-2026-59822</a></li>
+  <li><a href="https://www.infosecurity-magazine.com/news/malicious-ai-agent-server">Infosecurity Magazine — Malicious postmark-mcp server (Koi Security)</a></li>
+  <li><a href="https://futuresearch.ai/blog/litellm-hack-were-you-one-of-the-47000/">FutureSearch — The LiteLLM compromise and its 47,000 downloads</a></li>
+  <li><a href="https://newsroom.ibm.com/2025-07-30-ibm-report-13-of-organizations-reported-breaches-of-ai-models-or-applications,-97-of-which-reported-lacking-proper-ai-access-controls">IBM — Cost of a Data Breach Report 2025</a> (37% shadow-AI policy figure)</li>
+  <li><a href="https://genai.owasp.org/">OWASP GenAI Security Project — Top 10 for LLM Applications 2026 and Top 10 for Agentic Applications</a> · <a href="https://atlas.mitre.org/">MITRE ATLAS</a> · <a href="https://www.nist.gov/itl/ai-risk-management-framework">NIST AI RMF</a></li>
 </ul>
 
 <footer>
-  How AI Is Built and Implemented · REV 1.2 · 19 September 2026 · Vendor-reported and third-party figures are kept distinct throughout.
+  How AI Is Built and Implemented · REV 1.3 · 20 October 2026 · Vendor-reported and third-party figures are kept distinct throughout.
 </footer>
 
 </div>
@@ -611,8 +631,9 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
 </script>
 <script>
 (function(){
-const T=['She','got','an','A','on','the','exam','.'];
-const ATT=[[0,0,0,1,0,0,0,0],[.10,.15,.50,.20,.03,.02,0,0],[.05,.35,.35,.10,.05,0,.10,0],[.03,.30,.15,.05,.02,0,.45,0],[.02,.30,.10,.03,.02,0,.53,0],[.02,.25,.08,.03,.02,0,.60,0],[.02,.22,.06,.03,.02,0,.65,0]];
+const T=['On','the','exam','she','got','an','A'];
+const AI=6; /* index of the token being resolved; causal attention reads only indices 0..AI */
+const ATT=[[0,0,0,0,0,0,1],[.02,.02,.03,.10,.15,.50,.18],[.03,.02,.10,.05,.35,.35,.10],[.02,.01,.45,.03,.30,.14,.05],[.02,.01,.53,.02,.30,.09,.03],[.02,.01,.60,.02,.25,.07,.03],[.02,.01,.65,.02,.22,.05,.03]];
 const H=['Article "a"','Letter name','Grade / score','Blood type / other'];
 const P=[[.45,.30,.15,.10],[.30,.40,.20,.10],[.10,.40,.40,.10],[.04,.21,.70,.05],[.02,.10,.86,.02],[.01,.06,.91,.02],[.01,.04,.93,.02]];
 const NOTE=['Embedding only. The ID for "A" carries every past use of the token at once, mostly the article, since that is its commonest use in training text. No context yet.',
@@ -620,17 +641,18 @@ const NOTE=['Embedding only. The ID for "A" carries every past use of the token 
 '"got" is now in view: something was received. Letter-name and grade tie. Nothing has been undone; the vector has been rewritten.',
 '"exam" dominates attention. Grade jumps to 70%. This is the layer where the reading effectively flips.',
 'Later layers sharpen rather than change the answer. Residual mass on "letter" reflects that a grade A is also, literally, the letter.',
-'Near-final state. If this were the last position, the next-token probabilities would favor continuations like "plus", "minus", "and".',
+'Near-final state. The next-token prediction at this position now favors continuations that fit a grade, such as "+", "minus" or "on the final", over ones that fit a letter of the alphabet.',
 'Output. One direction only: no layer ever re-ran an earlier layer. Revision, if any, happens in the tokens the model writes next.'];
-const X=[70,150,225,300,375,450,540,620];
+const X=[70,155,240,325,410,495,600];
 const cs=getComputedStyle(document.documentElement);
 function draw(l){
  let s='',k='';
  T.forEach(function(t,i){const w=ATT[l][i];
-  if(i!==3&&w>0){s+='<path d="M300 118 Q '+((300+X[i])/2)+' 60 '+X[i]+' 118" fill="none" stroke="var(--pt-blue)" stroke-width="'+(1+w*10).toFixed(1)+'" opacity="'+(0.25+w).toFixed(2)+'" stroke-linecap="round"/>';}
-  const f=i===3?'var(--fa)':'var(--fn)',st=i===3?'var(--amber)':'var(--axis)';
-  k+='<rect x="'+(X[i]-32)+'" y="120" width="64" height="34" rx="6" fill="'+f+'" stroke="'+st+'" stroke-width="'+(i===3?2:1)+'"/><text class="h" x="'+X[i]+'" y="137" text-anchor="middle" dominant-baseline="central">'+t+'</text>';
-  if(i!==3&&w>0)k+='<text class="s" x="'+X[i]+'" y="170" text-anchor="middle">'+Math.round(w*100)+'%</text>';});
+  const ax=X[AI],cy=118-2*(20+Math.abs(ax-X[i])*0.12);
+  if(i!==AI&&w>0){s+='<path d="M'+ax+' 118 Q '+((ax+X[i])/2)+' '+cy.toFixed(1)+' '+X[i]+' 118" fill="none" stroke="var(--pt-blue)" stroke-width="'+(1+w*10).toFixed(1)+'" opacity="'+(0.25+w).toFixed(2)+'" stroke-linecap="round"/>';}
+  const f=i===AI?'var(--fa)':'var(--fn)',st=i===AI?'var(--amber)':'var(--axis)';
+  k+='<rect x="'+(X[i]-32)+'" y="120" width="64" height="34" rx="6" fill="'+f+'" stroke="'+st+'" stroke-width="'+(i===AI?2:1)+'"/><text class="h" x="'+X[i]+'" y="137" text-anchor="middle" dominant-baseline="central">'+t+'</text>';
+  if(i!==AI&&w>0)k+='<text class="s" x="'+X[i]+'" y="170" text-anchor="middle">'+Math.round(w*100)+'%</text>';});
  document.getElementById('lines').innerHTML=s;document.getElementById('toks').innerHTML=k;
  const mx=Math.max.apply(null,P[l]);
  document.getElementById('bars').innerHTML=H.map(function(h,i){return '<span>'+h+'</span><div class="bar '+(P[l][i]===mx?'win':'')+'"><i style="width:'+(P[l][i]*100)+'%"></i></div><span style="text-align:right">'+Math.round(P[l][i]*100)+'%</span>';}).join('');
