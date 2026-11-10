@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>How AI Is Built and Implemented — REV 1.3</title>
+<title>How AI Is Built and Implemented — REV 1.4</title>
 <meta name="description" content="High-level overview of how modern AI systems are built (data, pretraining, post-training, evaluation) and implemented (serving, orchestration, applications), with diagrams, a training-compute chart, and confidence-tagged provenance.">
 <style>
 :root{
@@ -131,8 +131,8 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
   <h1>How AI Is Built and Implemented</h1>
   <p class="sub">The lifecycle, the mechanism inside the model, the scale economics, and the software layer that turns a model into a product.</p>
   <div class="meta">
-    <span class="pill rev">REV 1.3</span>
-    <span class="pill">20 October 2026</span>
+    <span class="pill rev">REV 1.4</span>
+    <span class="pill">November 10, 2026</span>
     <span class="pill">Confidence-tagged · provenance at end</span>
     <a class="dl" href="how-ai-is-built-light.pdf" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4M4 19h16"/></svg>Download PDF · light</a>
     <a class="dl alt" href="how-ai-is-built-dark.pdf" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4M4 19h16"/></svg>Download PDF · dark</a>
@@ -362,16 +362,17 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
 
 
 <h2 id="security" class="s6">5. The security layer: prominent, specified, not yet deployed</h2>
-<p>Figures 1 and 4 have no security component, and that omission mirrors the field. As of October 2026 the controls for AI systems are well specified in OWASP's Top 10 lists for LLM Applications (2026 edition) and for Agentic Applications, MITRE ATLAS and the NIST AI Risk Management Framework, yet the incident record shows them deployed unevenly, and one class of threat has no complete fix at any layer. This is now a prominent issue that needs to be addressed, not a footnote to the architecture. The evidence divides into three tiers, and each carries a different status.</p>
+<p>Figures 1 and 4 have no security component, and that omission mirrors the field. As of November 2026 the controls for AI systems are well specified in OWASP's Top 10 lists for LLM Applications (2026 edition) and for Agentic Applications, MITRE ATLAS and the NIST AI Risk Management Framework, yet the incident record shows them deployed unevenly, and one class of threat has no complete fix at any layer. This is now a prominent issue that needs to be addressed, not a footnote to the architecture. The evidence divides into three tiers, and each carries a different status.</p>
 
 <div class="evbox">
   <p style="margin:0 0 4px"><span class="term">2025–26 evidence.</span> Figures are as reported by the cited source; most sources sell security products or research, so treat counts as indicative.</p>
   <ul>
     <li><span class="tag hi">HIGH</span>Prompt injection maps to six of the ten OWASP agentic categories, and an OWASP contributor told Infosecurity Europe 2026 it is an unsolved architectural problem. Root cause: the model receives system prompt, user text and retrieved content as one token stream with no channel that separates command from data.</li>
-    <li><span class="tag md">MED</span>MCP authorization is optional in the protocol, including in the current specification (revision of 28 July 2026); analysts note that permission models, rate limiting and response integrity remain left to the ecosystem. OX Security traced over 30 responsible disclosures and more than ten high or critical CVEs to one root cause in the official SDKs' local (STDIO) transport, which passes commands to the operating system unsanitized, and counted more than 7,000 publicly reachable servers. The Agent Report tallied 14 MCP CVEs by July 2026, and in September CISA added an MCP authentication bypass in LiteLLM (CVE-2026-59822) to its catalog of vulnerabilities exploited in the wild.</li>
+    <li><span class="tag md">MED</span>MCP authorization is optional in the protocol, including in the current specification (revision of July 28, 2026, still the current one in November); analysts note that permission models, rate limiting and response integrity remain left to the ecosystem. OX Security traced over 30 responsible disclosures and more than ten high or critical CVEs to one root cause in the official SDKs' local (STDIO) transport, which passes commands to the operating system unsanitized, and counted more than 7,000 publicly reachable servers. The Agent Report tallied 14 MCP CVEs by July 2026, and in September CISA added an MCP authentication bypass in LiteLLM (CVE-2026-59822) to its catalog of vulnerabilities exploited in the wild.</li>
     <li><span class="tag hi">HIGH</span>Supply chain: a backdoored postmark-mcp package that copied users' outgoing email to an attacker may have reached about 300 organizations (Koi Security, September 2025); backdoored LiteLLM releases on PyPI were downloaded nearly 47,000 times in about 46 minutes before quarantine (FutureSearch, March 2026).</li>
     <li><span class="tag hi">HIGH</span>Insecure output handling: Microsoft's Semantic Kernel shipped two remote-code-execution flaws: in Python, a model-controlled filter string reached <code>eval()</code> (CVE-2026-26030); in .NET, a file-download function accidentally exposed as a tool let the model write files to the host (CVE-2026-25592). Microsoft's remediation guidance is the textbook control: treat any model-influenced tool parameter as attacker-controlled input.</li>
     <li><span class="tag md">MED</span>Governance: only 37% of the breached organizations in IBM and Ponemon's 2025 Cost of a Data Breach study had policies to manage AI or detect shadow AI.</li>
+    <li><span class="tag md">MED</span>The disclosure volume has outgrown the early tallies. A list compiled by Valyu from CVE.org records and GitHub advisories counts 1,075 vulnerabilities in MCP servers and SDKs published between January 1 and October 23, 2026, within 2,675 across AI agent and LLM infrastructure, and finds 11 AI-infrastructure flaws added to CISA's exploited-vulnerabilities catalog during 2026. The Agent Report's 14 above is a curated list of notable CVEs, not a census. The pattern reached the protocol's own reference code: Adversa AI's November digest reports a GitHub advisory (GHSA-mvf5-2qqv-rg3c) for the official "everything" reference server, whose HTTP transport listened on all interfaces without authentication and exposed a tool that returns the process environment.</li>
     <li><span class="tag lo">LOW</span>OX Security's estimate of up to 200,000 vulnerable MCP instances is an extrapolation, not a scan.</li>
   </ul>
 </div>
@@ -571,19 +572,26 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
 <h2 id="provenance" class="s5">7. Provenance and confidence</h2>
 <ul class="prov">
   <li><span class="tag hi">HIGH</span>Lifecycle structure, transformer loop, prefill/decode asymmetry, KV cache role, implementation patterns. Stable, widely documented engineering.</li>
-  <li><span class="tag hi">HIGH</span>The 5× per year compute trend, 5.2-month doubling time and 3.5× per year cost trend, re-checked against Epoch AI's trends page on 20 Oct 2026; the power trend is from Epoch's separate power-usage analysis.</li>
-  <li><span class="tag hi">HIGH</span>All eight 2012–2024 chart points, re-checked on 20 Oct 2026 against Epoch's notable-models data (via Our World in Data's copy) and Epoch's frontier-models file. GPT-3, PaLM and Llama 3.1 405B are developer-reported values; the rest are third-party estimates, and Epoch rates its Gemini Ultra figure speculative.</li>
+  <li><span class="tag hi">HIGH</span>The 5× per year compute trend, 5.2-month doubling time and 3.5× per year cost trend, re-checked against Epoch AI's trends page on Nov 10, 2026 (the page was last updated in February 2026); the power trend is from Epoch's separate power-usage analysis.</li>
+  <li><span class="tag hi">HIGH</span>All eight 2012–2024 chart points, re-checked on Oct 20, 2026 against Epoch's notable-models data (via Our World in Data's copy) and Epoch's frontier-models file; six of them (AlexNet, GPT-3, PaLM, GPT-4, Gemini Ultra and Llama 3.1 405B) were confirmed again in the frontier-models file on Nov 10, 2026. GPT-3, PaLM and Llama 3.1 405B are developer-reported values; the rest are third-party estimates, and Epoch rates its Gemini Ultra figure speculative.</li>
   <li><span class="tag md">MED</span>The stack table's "binding constraint" column is the author's synthesis.</li>
   <li><span class="tag hi">HIGH</span>Section 6 mechanism: one-directional forward pass, residual-stream refinement, logit lens as a read-out, and the placement of backpropagation, self-correction and search. Standard usage in the ML and interpretability literature.</li>
   <li><span class="tag md">MED</span>The ≈3× training-to-inference cost per token is the standard rule of thumb (forward ≈ 2·N·D FLOP, full step ≈ 6·N·D), not a measured figure for any named model.</li>
   <li><span class="tag lo">LOW</span>The per-layer percentages and attention weights in Figure 7 and the hypothesis bars in Figure 8 are illustrative constructions, not measurements.</li>
   <li><span class="tag hi">HIGH</span>Section 5 threat classes and controls follow the OWASP Top 10 for LLM and Agentic Applications, MITRE ATLAS and NIST AI RMF categories. Prompt injection's unsolved status is the characterization of an OWASP contributor, and OWASP's own Top 10 offers mitigations rather than a fix.</li>
-  <li><span class="tag md">MED</span>Section 5 status badges (Partial / Rare / Unsolved) are the author's assessment of typical 2026 production deployments, inferred from the incident record; they are not survey data. Counts of exposed MCP servers, CVEs and downloads are as reported by security vendors and researchers with a commercial interest in the topic.</li>
+  <li><span class="tag md">MED</span>Section 5 status badges (Partial / Rare / Unsolved) are the author's assessment of typical 2026 production deployments, inferred from the incident record; they are not survey data. Counts of exposed MCP servers, CVEs and downloads are as reported by security vendors and researchers with a commercial interest in the topic. The reference-server advisory is cited from Adversa AI's digest and was not read at the advisory itself.</li>
   <li><span class="tag lo">LOW</span>The "up to 200,000 vulnerable MCP instances" figure is an extrapolation by OX Security, not a scan.</li>
-  <li><span class="tag md">MED</span>The four 2025–26 chart points are Epoch AI estimates, not lab disclosures; Epoch rates Grok 3, GPT-4.5 and GPT-6 Astra likely and Grok 4 speculative.</li>
+  <li><span class="tag md">MED</span>The four 2025–26 chart points are Epoch AI estimates, not lab disclosures; Epoch rates Grok 3, GPT-4.5 and GPT-6 Astra likely and Grok 4 speculative. All four were unchanged on Nov 10, 2026, when GPT-6 Astra was still the most recent model in Epoch's frontier-models file with a compute estimate; the frontier models released since then have none.</li>
 </ul>
 
-<h3>Changes in REV 1.3 (20 October 2026)</h3>
+<h3>Changes in REV 1.4 (November 10, 2026)</h3>
+<ul>
+  <li><span class="term">November re-check.</span> The Epoch AI trend figures, the 2025–26 compute estimates in Figure 3 and the Model Context Protocol specification were read again on November 10, 2026. None changed: the July 28 revision is still the current specification and authorization is still optional in it.</li>
+  <li><span class="term">Security evidence extended.</span> Added a 2026 vulnerability count for the MCP ecosystem and a November advisory against the protocol's reference server, and noted that the earlier figure of 14 CVEs is a curated list.</li>
+  <li><span class="term">US date style.</span> Dates are now written month first, matching the companion paper.</li>
+</ul>
+
+<h3>Changes in REV 1.3 (October 20, 2026)</h3>
 <ul>
   <li><span class="term">Corrected Figure 7.</span> The example had the token "A" attending to "exam", a word after it. Generative models attend only to earlier tokens, so the sentence is reordered to "On the exam she got an A" and the text now says so.</li>
   <li><span class="term">Figure 3 extended to 2026.</span> The unsourced 2025–26 band is replaced by Epoch AI's own estimates for Grok 3, GPT-4.5, Grok 4 and GPT-6 Astra, and all earlier points were re-checked against Epoch data.</li>
@@ -605,6 +613,8 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
   <li><a href="https://thehackernews.com/2026/04/anthropic-mcp-design-vulnerability.html">The Hacker News — MCP design vulnerability enables RCE</a></li>
   <li><a href="https://www.ox.security/research-news/the-mother-of-all-ai-supply-chains-critical-systemic-vulnerability-at-the-core-of-the-mcp/">OX Security — Systemic vulnerability at the core of MCP</a> (STDIO root cause, 7,000+ servers, up to 200,000 instances)</li>
   <li><a href="https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization">Model Context Protocol specification, revision 2026-07-28 — Authorization</a></li>
+  <li><a href="https://www.valyu.ai/blogs/mcp-ai-agent-vulnerabilities">Valyu — MCP and AI agent CVEs in 2026: the full list</a> (1,075 MCP and 2,675 total vulnerabilities to October 23, 2026)</li>
+  <li><a href="https://adversa.ai/blog/top-mcp-security-resources-november-2026/">Adversa AI — MCP security, November 2026</a> (reference-server advisory)</li>
   <li><a href="https://www.esecurityplanet.com/news/news-cisa-exploited-ai-flaws/">eSecurity Planet — CISA adds exploited AI flaws to KEV, including LiteLLM CVE-2026-59822</a></li>
   <li><a href="https://www.infosecurity-magazine.com/news/malicious-ai-agent-server">Infosecurity Magazine — Malicious postmark-mcp server (Koi Security)</a></li>
   <li><a href="https://futuresearch.ai/blog/litellm-hack-were-you-one-of-the-47000/">FutureSearch — The LiteLLM compromise and its 47,000 downloads</a></li>
@@ -613,7 +623,7 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-si
 </ul>
 
 <footer>
-  How AI Is Built and Implemented · REV 1.3 · 20 October 2026 · Vendor-reported and third-party figures are kept distinct throughout.
+  How AI Is Built and Implemented · REV 1.4 · November 10, 2026 · Vendor-reported and third-party figures are kept distinct throughout.
 </footer>
 
 </div>

@@ -8,7 +8,7 @@ The common thread is AI: how it is built, what it costs, and the tools it can bu
 
 | Page | What it covers | PDF |
 |---|---|---|
-| [Why Enterprises Pay the Frontier Premium](https://ne0busin3ss.github.io/frontier-premium-economics.html) | The economics of choosing frontier proprietary models over open weights: error compounding, the labour denominator, substitution modes, threshold-gated value and self-hosting cost. | [PDF](frontier-premium-economics.pdf) |
+| [Why Enterprises Pay the Frontier Premium](https://ne0busin3ss.github.io/frontier-premium-economics.html) | The economics of choosing frontier proprietary models over open weights: the unit of output, error compounding, the labor denominator, substitution modes, threshold-gated value and self-hosting cost. | [PDF](frontier-premium-economics.pdf) |
 | [How AI Is Built and Implemented](https://ne0busin3ss.github.io/how-ai-is-built.html) | The lifecycle from training to inference, what happens inside the model, the scale economics, the implementation stack and its security layer. | [Light](how-ai-is-built-light.pdf) · [Dark](how-ai-is-built-dark.pdf) |
 
 ## Built with Claude
